@@ -14,3 +14,41 @@ This practical investigates genetic regions associated with comb mass in an F8 a
 The objectives are to inspect the dataset, assess marker order and the genetic map, identify QTL, estimate their positions and effects, and compare results with and without adjustment for sex and body weight.
 
 The supplied marker data cover chromosomes 1 and 3. Significance thresholds will therefore apply to the scanned chromosomes.
+
+## 2. Load and inspect data
+
+```{r}
+#| label: locate-input-data
+
+data_path <- "data/raw/QTL_group_work.csv"
+stopifnot(
+  file.exists(data_path)
+)
+
+tools::md5sum(data_path)
+```
+
+```{r}
+#| label: inspect-dataset-layout
+
+raw_csv <- read.csv(
+  data_path,
+  header = FALSE,
+  colClasses = "character",
+  na.strings = NULL,
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
+
+dim(raw_csv)
+
+raw_csv[1:10, 1:10]
+```
+
+```{r}
+dplyr::glimpse(raw_csv)
+```
+
+#### Observations
+
+The dataset contains 575 rows and 44 columns. The first three rows contain column names, chromosome assignments, and supplied map positions, leaving 572 individual records. The first four columns contain individual ID, body weight at 212 days, sex, and comb mass; the remaining 40 columns contain marker genotypes. The displayed records include genotype codes A, H, and B. All entries were initially imported as text to preserve the original coding. The supplied position values require further assessment before being interpreted as genetic distances.
