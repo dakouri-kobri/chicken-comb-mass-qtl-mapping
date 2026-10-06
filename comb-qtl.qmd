@@ -52,3 +52,45 @@ dplyr::glimpse(raw_csv)
 #### Observations
 
 The dataset contains 575 rows and 44 columns. The first three rows contain column names, chromosome assignments, and supplied map positions, leaving 572 individual records. The first four columns contain individual ID, body weight at 212 days, sex, and comb mass; the remaining 40 columns contain marker genotypes. The displayed records include genotype codes A, H, and B. All entries were initially imported as text to preserve the original coding. The supplied position values require further assessment before being interpreted as genetic distances.
+
+### Separate individual records and marker information
+
+```{r}
+#| label: separate-input-records
+
+column_names <- as.character(
+  unlist(raw_csv[1, ], use.names = FALSE)
+)
+
+stopifnot(
+  !anyDuplicated(column_names),
+  identical(column_names[1:4], c("id", "w212", "sex", "comb_g"))
+)
+
+individual_records <- raw_csv[-c(1, 2, 3), , drop = FALSE]
+names(individual_records) <- column_names
+
+marker_columns <- 5:ncol(raw_csv)
+
+marker_metadata <- data.frame(
+  marker = column_names[marker_columns],
+  chromosome = as.character(
+    unlist(raw_csv[2, marker_columns], use.names = FALSE)
+  ),
+  supplied_position = as.numeric(
+    unlist(raw_csv[3, marker_columns], use.names = FALSE)
+  )
+)
+
+cat("Individual records:")
+nrow(individual_records)
+cat("\nMarkermetadata")
+nrow(marker_metadata)
+cat("\nchromosome")
+table(marker_metadata$chromosome)
+
+stopifnot(
+  !anyDuplicated(individual_records$id),
+  !any(trimws(individual_records$id) %in% c("", "-", "NA"))
+)
+```
