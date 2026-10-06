@@ -171,3 +171,11 @@ print(availability_summary, row.names = FALSE)
 ### Observations
 
 All 447 individuals with recorded comb mass also have recorded sex. Of these, 440 have body-weight measurements, leaving seven individuals with comb mass and sex but no body weight. The primary comparison of unadjusted, sex-adjusted, body-weight-adjusted, and jointly adjusted scans will therefore use the same 440 individuals. This keeps sample composition constant, allowing differences between scans to be attributed to covariate adjustment rather than the inclusion or exclusion of birds.
+
+## 3. Cross design, import, and validation
+
+The study population is an F8 advanced intercross between Red Junglefowl and White Leghorn chickens. For this R/qtl practical, the data are represented as an intercross (`f2`).
+
+This is an analytical approximation, not a reclassification of the population as biologically F2. The subsequent map assessment will consider accumulated recombination in the advanced intercross. The standard R/qtl workflow does not account for family relationships.
+
+The import uses the standard R/qtl genotype convention: A = AA, H = AB, B = BB, D = AA or AB, and C = AB or BB.
