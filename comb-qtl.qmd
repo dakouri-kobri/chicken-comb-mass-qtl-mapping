@@ -131,3 +131,43 @@ The dataset contains 572 individuals and 40 markers, with 9 markers on chromosom
 Comb mass is available for 447 individuals, matching the number of birds with comb measurements described in the practical. Body weight is available for 471 individuals, and sex for 571. Sex is recorded as code 1 for 272 individuals and code 2 for 299 individuals, with one missing value; the labels male and female have not yet been assigned.
 
 The numbers of available measurements do not establish how many individuals have all three variables recorded. This overlap needs to be checked before comparing scans with different covariates, so that changes in QTL results can be distinguished from changes in the analyzed sample.
+
+### Check availability for covariate comparisons
+
+```{r}
+#| label: inspect-complete-phenotypes
+
+phenotype_available <- sapply(
+  individual_records[, c("comb_g", "sex", "w212")],
+  function(values) {
+    !is.na(values) & !(trimws(values) %in% c("", "-", "NA"))
+  }
+)
+
+availability_summary <- data.frame(
+  Required_variables = c(
+    "Comb mass",
+    "Comb mass and sex",
+    "Comb mass and body weight",
+    "Comb mass, sex, and body weight"
+  ),
+  Individuals = c(
+    sum(phenotype_available[, "comb_g"]),
+    sum(
+      phenotype_available[, "comb_g"] &
+        phenotype_available[, "sex"]
+    ),
+    sum(
+      phenotype_available[, "comb_g"] &
+        phenotype_available[, "w212"]
+    ),
+    sum(rowSums(phenotype_available) == 3)
+  )
+)
+
+print(availability_summary, row.names = FALSE)
+```
+
+### Observations
+
+All 447 individuals with recorded comb mass also have recorded sex. Of these, 440 have body-weight measurements, leaving seven individuals with comb mass and sex but no body weight. The primary comparison of unadjusted, sex-adjusted, body-weight-adjusted, and jointly adjusted scans will therefore use the same 440 individuals. This keeps sample composition constant, allowing differences between scans to be attributed to covariate adjustment rather than the inclusion or exclusion of birds.
