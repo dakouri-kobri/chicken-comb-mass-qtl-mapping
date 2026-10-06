@@ -1,0 +1,16 @@
+---
+title: "QTL Mapping of Chicken Comb Mass"
+subtitle: "An F8 advanced intercross practical"
+author: "Your name"
+date: today
+format: html
+editor: visual
+---
+
+## 1. Introduction {.unnumbered}
+
+This practical investigates genetic regions associated with comb mass in an F8 advanced intercross between Red Junglefowl and White Leghorn chickens.
+
+The objectives are to inspect the dataset, assess marker order and the genetic map, identify QTL, estimate their positions and effects, and compare results with and without adjustment for sex and body weight.
+
+The supplied marker data cover chromosomes 1 and 3. Significance thresholds will therefore apply to the scanned chromosomes.
