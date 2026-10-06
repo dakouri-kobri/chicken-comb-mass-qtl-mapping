@@ -7,6 +7,12 @@ format: html
 editor: visual
 ---
 
+## 0. Load libraries
+
+```{r}
+library("qtl")
+```
+
 ## 1. Introduction {.unnumbered}
 
 This practical investigates genetic regions associated with comb mass in an F8 advanced intercross between Red Junglefowl and White Leghorn chickens.
@@ -179,3 +185,46 @@ The study population is an F8 advanced intercross between Red Junglefowl and Whi
 This is an analytical approximation, not a reclassification of the population as biologically F2. The subsequent map assessment will consider accumulated recombination in the advanced intercross. The standard R/qtl workflow does not account for family relationships.
 
 The import uses the standard R/qtl genotype convention: A = AA, H = AB, B = BB, D = AA or AB, and C = AB or BB.
+
+### Import the cross
+
+All 572 individuals are retained for marker and map assessment.
+
+```{r}
+#| label: import-comb-cross
+
+comb_cross <- read.cross(
+  format = "csv",
+  dir = dirname(data_path),
+  file = basename(data_path),
+  genotypes = c("A", "H", "B", "D", "C"),
+  alleles = c("A", "B"),
+  na.strings = c("-", "NA"),
+  crosstype = "f2",
+  estimate.map = FALSE,
+  convertXdata = FALSE
+)
+```
+
+### Summarize the imported cross
+
+```{r}
+#| label: summarize-comb-cross
+
+summary(comb_cross)
+
+cat("\nCross object classes:\n")
+class(comb_cross)
+
+cat("\nNumber of individuals:\n")
+nind(comb_cross)
+
+cat("\nNumber of markers:\n")
+totmar(comb_cross)
+
+cat("\nNumber of markers per chromosome:\n")
+nmar(comb_cross)
+
+cat("\nPhenotype column names:\n")
+names(comb_cross$pheno)
+```
