@@ -1,0 +1,22 @@
+project:
+  type: default
+  output-dir: _output
+  render:
+    - comb-qtl.qmd
+
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: false
+    code-tools: true
+    embed-resources: true
+
+execute:
+  echo: true
+  warning: true
+  message: false
+  cache: false
+  freeze: false
+  

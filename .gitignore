@@ -1,0 +1,20 @@
+# RStudio session files
+.Rproj.user/
+
+# R session files
+.Rhistory
+.RData
+.Ruserdata
+
+# Quarto generated files
+.quarto/
+_output/
+*_files/
+*_cache/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Data
+data/
