@@ -94,3 +94,32 @@ stopifnot(
   !any(trimws(individual_records$id) %in% c("", "-", "NA"))
 )
 ```
+
+### Inspect genotype codes and missing phenotypes
+
+```{r}
+#| label: inspect-codes-and-missingness
+
+genotype_codes <- unlist(
+  individual_records[, marker_columns, drop = FALSE],
+  use.names = FALSE
+)
+
+table(genotype_codes, useNA = "ifany")
+
+phenotype_names <- c("w212", "sex", "comb_g")
+
+missing_counts <- vapply(
+  individual_records[, phenotype_names, drop = FALSE],
+  function(values) sum(trimws(values) %in% c("", "-", "NA")),
+  integer(1)
+)
+
+data.frame(
+  Phenotype = phenotype_names,
+  Missing = unname(missing_counts),
+  Observed = nrow(individual_records) - unname(missing_counts)
+)
+
+table(individual_records$sex, useNA = "ifany")
+```
