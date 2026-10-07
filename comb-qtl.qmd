@@ -522,3 +522,31 @@ Comb mass differs markedly between the recorded sex groups. Among 216 individual
 #### **Interpretation**
 
 The pronounced separation between sex groups helps explain the two concentrations in the pooled comb-mass histogram. Sex is therefore an important covariate to consider when comparing QTL scans with and without adjustment. Points beyond the boxplot whiskers are unusual within their group but do not, by themselves, indicate measurement errors. The groups remain labeled by their recorded codes until the male/female coding is confirmed.
+
+### Examine the body-weight distribution
+
+```{r}
+#| label: fig-comb-body-weight-distribution
+#| fig-cap: "Distribution of the 471 recorded body-weight measurements."
+
+hist(
+  phenotype_data$body_weight,
+  breaks = 25,
+  col = "#009E73",
+  border = "white",
+  main = "Body weight at 212 days",
+  xlab = "Body weight (recorded units)",
+  ylab = "Number of individuals",
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+```
+
+#### **Observations** 
+
+Body weight at 212 days shows a broad distribution, with the tallest bars around 1,050–1,100 and 1,200–1,250 recorded units. Frequencies generally decrease toward both extremes, with relatively few individuals below 750 or above 1,750. The distribution has a modest right tail, consistent with the mean (1,199.6) being slightly higher than the median (1,178). The observed range is 684–1,999, based on 471 individuals.
+
+#### **Interpretation**
+
+Body weight shows less pronounced separation into distinct concentrations than pooled comb mass. The histogram describes variation in body weight but does not establish its relationship with comb mass. Examining their association overall and within each sex group will help assess the relevance of body weight as a covariate in the QTL scans.
