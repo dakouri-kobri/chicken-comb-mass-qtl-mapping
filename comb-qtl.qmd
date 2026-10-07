@@ -2192,3 +2192,64 @@ On chromosome 1, the unadjusted peak (LOD 1.427, adjusted p = 0.640) and sex-adj
 Chromosome 3 provides consistent evidence of a comb-mass QTL across the four covariate specifications. Chromosome 1 provides weaker, model-dependent evidence, particularly after both covariates are included. Its fully adjusted result should therefore be interpreted cautiously rather than given the same weight as the chromosome 3 result. These significance assessments apply separately within each model across chromosomes 1 and 3 and remain approximate because the permutations do not account for family relationships.
 
 Chromosome 3 p-values displayed as 0.000 indicate very small empirical permutation p-values. With only 1,000 permutations, such small tail probabilities cannot be estimated precisely.
+
+### Plot the fully adjusted scan with its threshold
+
+```{r}
+#| label: fig-fully-adjusted-scan-threshold
+#| fig-cap: "Comb-mass scan adjusted for sex and body weight, with its nominal 5% permutation threshold across chromosomes 1 and 3."
+#| fig-width: 11
+#| fig-height: 7
+#| out-width: "100%"
+
+fully_adjusted_threshold <- permutation_thresholds$lod_5_percent[
+  permutation_thresholds$scan == "Sex + body weight"
+]
+
+plot_upper_limit <- 1.25 * max(
+  out.hk_sex_weight[, 3],
+  fully_adjusted_threshold,
+  na.rm = TRUE
+)
+
+par(
+  mar = c(5, 5, 4, 2) + 0.1,
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+
+plot(
+  out.hk_sex_weight,
+  chr = c("1", "3"),
+  col = "#009E73",
+  lwd = 2,
+  ylim = c(0, plot_upper_limit),
+  main = "Comb-mass scan adjusted for sex and body weight",
+  xlab = "Chromosome",
+  ylab = "LOD score"
+)
+
+abline(
+  h = fully_adjusted_threshold,
+  col = "#666666",
+  lty = 2,
+  lwd = 2
+)
+
+legend(
+  "topright",
+  legend = c(
+    "Sex + body weight",
+    "5% permutation threshold"
+  ),
+  col = c("#009E73", "#666666"),
+  lty = c(1, 2),
+  lwd = 2,
+  bty = "n"
+)
+```
+
+#### Observations
+
+After adjustment for sex and body weight, the chromosome 3 peak clearly exceeds the permutation threshold, whereas the chromosome 1 peak exceeds it only narrowly. The numerical scan summary places these peaks at 12.76 cM on chromosome 3 (LOD 21.448) and 125.00 cM on chromosome 1 (LOD 2.982). The plot highlights the much stronger evidence for a QTL on chromosome 3 than on chromosome 1.
