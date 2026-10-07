@@ -790,3 +790,51 @@ plotRF(
 #### **Interpretation**
 
 Chromosome 1 appears broadly consistent with the supplied order, whereas chromosome 3 contains specific inconsistencies requiring further investigation. The patterns at Gg_rs15777012 and 3_23988469 could reflect incorrect placement or genotype-coding problems; the heatmap alone cannot distinguish these explanations. Although 3_23988469 has substantial missingness (45.28%), Gg_rs15777012 has little missingness (0.87%). Alternative-order comparisons and genotype checks are therefore needed before changing the map. Bright blocks also suggest that the data may provide limited information for resolving the order of some closely linked markers.
+
+### Compare alternative local marker orders
+
+The supplied order is compared with alternative orders within sliding windows of five markers. The comparison uses the minimum number of crossovers needed to explain the observed genotypes.
+
+```{r}
+#| label: check-comb-marker-order
+
+ripple_chr1 <- ripple(
+  comb_cross_rf,
+  chr = "1",
+  window = 5,
+  method = "countxo"
+)
+
+ripple_chr3 <- ripple(
+  comb_cross_rf,
+  chr = "3",
+  window = 5,
+  method = "countxo"
+)
+```
+
+```{r}
+#| label: summarize-comb-marker-orders
+
+cat("Chromosome 1: comparison of local marker orders\n")
+print(
+  unclass(summary(ripple_chr1)),
+  max = 100000
+)
+
+cat("\nChromosome 3: comparison of local marker orders\n")
+print(
+  unclass(summary(ripple_chr3)),
+  max = 100000
+)
+```
+
+#### **Observations** 
+
+**Chromosome 1.** The supplied order requires 1,261 obligate crossovers, compared with 1,297 after exchanging markers 5 and 6. No improvement was found in the five-marker-window search, supporting retention of the supplied order.
+
+**Chromosome 3.** Of the 88 alternatives reported in the summary, 84 require fewer crossovers than the supplied order, three have the same count, and one requires two more. The supplied order requires 3,705 crossovers, whereas the best alternative requires 3,311, a reduction of 394 (10.6%). Its order begins 3–1–2–4–5, moving Gg_rs15777012 (marker 3) to the beginning of the chromosome. The second-best order begins 3–1–2–5–4 and requires 3,315 crossovers. The next three alternatives each require 3,373. All reported alternatives retain 3_23988469 (marker 8) in position 8.
+
+#### **Interpretation**
+
+The strongest improvement involves repositioning Gg_rs15777012, consistent with its unusual pattern in the recombination heatmap. The four-crossover difference between the two leading orders provides limited discrimination between the arrangements of markers 4 and 5. However, this local search does not establish the globally optimal chromosome order. Retention of 3_23988469 in every reported alternative does not confirm its placement: its unusual recombination pattern remains unresolved and requires further investigation. Allele coding should be checked before adopting a revised order.
