@@ -309,3 +309,80 @@ The imported cross contains 572 individuals and 40 markers across chromosomes 1 
 Genotype conversion preserved 8,045 AA calls, 10,031 AB calls, 3,723 BB calls, 239 ambiguous AB-or-BB calls, and 842 missing entries. Under the adopted standard R/qtl coding convention, the original C entries were retained as ambiguous genotypes rather than discarded. Overall, 96.3% of marker–individual combinations have recorded genotype information.
 
 Phenotype missingness was also preserved: 125 individuals lack comb mass, 101 lack body weight, and one lacks sex. Sex remains coded as 1 or 2 without assigning biological labels. Although R/qtl labels the object as an F2 intercross, this is an approximate analytical representation of the F8 population and does not account for family relationships.
+
+## 3. Missing data and phenotype distributions
+
+### Examine genotype missingness
+
+Display genotype availability across individuals and markers. Black cells indicate missing calls; gray cells indicate partially informative genotype calls.
+
+```{r}
+#| label: fig-comb-missing-genotypes
+#| fig-cap: "Genotype availability across chromosomes 1 and 3."
+#| fig-height: 7
+
+par(cex.main = 1.3, cex.lab = 1.2, cex.axis = 1.1)
+
+plotMissing(
+  comb_cross,
+  main = "Genotype availability in the comb dataset"
+)
+```
+
+Quantify missing calls for each marker to identify the markers with the lowest data coverage.
+
+```{r}
+#| label: marker-missingness-summary
+
+marker_missingness <- do.call(
+  rbind,
+  lapply(names(comb_cross$geno), function(chr) {
+    genotype_matrix <- comb_cross$geno[[chr]]$data
+    
+    data.frame(
+      chromosome = chr,
+      marker = colnames(genotype_matrix),
+      missing = colSums(is.na(genotype_matrix)),
+      missing_percent = round(
+        100 * colMeans(is.na(genotype_matrix)),
+        2
+      )
+    )
+  })
+)
+
+marker_missingness <- marker_missingness[
+  order(-marker_missingness$missing),
+]
+
+# Calculate totals before adding the summary row.
+total_missing <- sum(marker_missingness$missing)
+total_entries <- nind(comb_cross) * nrow(marker_missingness)
+
+marker_missingness <- rbind(
+  marker_missingness,
+  data.frame(
+    chromosome = "All",
+    marker = "Total",
+    missing = total_missing,
+    missing_percent = round(
+      100 * total_missing / total_entries,
+      2
+    )
+  )
+)
+
+rownames(marker_missingness) <- NULL
+
+print(marker_missingness, row.names = FALSE)
+```
+
+Ambiguous AB-or-BB calls contain some genotype information and are not counted as fully missing in this table.
+
+#### **Observations**
+
+Overall, 842 of the 22,880 genotype entries are missing (3.68%). Missingness is concentrated at particular markers, especially on chromosome 3. Marker 3_23988469 has the highest missingness, with 259 of 572 individuals missing (45.28%), followed by Gg_rs15337358 (138; 24.13%), chr3_16000000 (84; 14.69%), and 3_16300000 (61; 10.66%). Together, these four markers account for 542 of the 842 missing entries (64.37%). On chromosome 1, 1_134165693 has the highest missingness (49; 8.57%). The remaining 35 markers each have no more than 5.07% missing genotypes.
+
+#### **Interpretation**
+
+The vertical bands in the plot indicate that genotype availability varies substantially between markers. Markers with high missingness provide less direct genotype information and warrant attention when examining marker order and estimating the genetic map. Because missingness alone does not establish a genotyping error or explain why the data are missing, these markers will not be removed solely on this evidence.
