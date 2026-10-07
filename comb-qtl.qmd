@@ -287,3 +287,17 @@ stopifnot(
 
 cat("\nGenotype conversion preserves the input counts.\n")
 ```
+
+### Check imported phenotype missingness
+
+```{r}
+#| label: validate-imported-phenotypes
+
+cat("Missing phenotype values after import:\n")
+colSums(
+  is.na(comb_cross$pheno[, c("comb_g", "sex", "w212")])
+)
+
+cat("\nImported sex codes:\n")
+table(comb_cross$pheno$sex, useNA = "ifany")
+```
