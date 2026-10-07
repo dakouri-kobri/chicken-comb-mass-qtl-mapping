@@ -2276,3 +2276,32 @@ stopifnot(
   )
 )
 ```
+
+### Define the initial QTL positions
+
+The unrounded positions from the fully adjusted scan will be used.
+
+```{r}
+#| label: define-comb-qtls
+
+adjusted_peaks <- summary(out.hk_sex_weight)
+
+initial_qtl_peaks <- adjusted_peaks[
+  match(c("1", "3"), as.character(adjusted_peaks$chr)),
+  ,
+  drop = FALSE
+]
+
+print(initial_qtl_peaks)
+
+comb_qtl_initial <- makeqtl(
+  comb_cross_model,
+  chr = as.character(initial_qtl_peaks$chr),
+  pos = initial_qtl_peaks$pos,
+  what = "prob"
+)
+
+summary(comb_qtl_initial)
+```
+
+Initial QTL positions were taken from the chromosome-specific peaks of the scan adjusted for sex and body weight: 125.0 cM on chromosome 1 and 12.8 cM on chromosome 3. Genotype probabilities at these positions were extracted for joint model fitting.
