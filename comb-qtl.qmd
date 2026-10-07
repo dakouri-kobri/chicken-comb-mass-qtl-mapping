@@ -1801,3 +1801,67 @@ comb_cross_imputed <- sim.geno(
   stepwidth = "fixed"
 )
 ```
+
+## 8. Compare single-QTL scans with and without covariates
+
+### Define a common analysis sample
+
+Select individuals with observed comb mass, sex, and body weight.
+
+```{r}
+#| label: define-common-scan-sample
+
+scan_phenotypes_all <- pull.pheno(
+  comb_cross_genoprob,
+  pheno.col = c("comb_g", "sex", "w212")
+)
+
+scan_complete <- complete.cases(scan_phenotypes_all)
+
+comb_cross_scan <- subset(
+  comb_cross_genoprob,
+  ind = scan_complete
+)
+
+scan_phenotypes <- pull.pheno(
+  comb_cross_scan,
+  pheno.col = c("comb_g", "sex", "w212")
+)
+
+cat("Individuals retained for all four scans:\n")
+print(nind(comb_cross_scan))
+
+cat("\nIndividuals excluded because of missing phenotype or covariate data:\n")
+print(sum(!scan_complete))
+
+cat("\nSex-group counts in the common analysis sample:\n")
+print(table(scan_phenotypes$sex))
+```
+
+Encode sex as a binary covariate, retaining the neutral group labels because the sex-code key has not been independently confirmed.
+
+```{r}
+#| label: prepare-scan-covariates
+
+stopifnot(
+  all(scan_phenotypes$sex %in% c(1, 2))
+)
+
+scan_covariates <- cbind(
+  sex_group_2 = as.numeric(scan_phenotypes$sex == 2),
+  body_weight = scan_phenotypes$w212
+)
+
+stopifnot(
+  nrow(scan_covariates) == nind(comb_cross_scan),
+  !anyNA(scan_covariates)
+)
+
+head(scan_covariates)
+```
+
+All four scans use the same individuals with complete comb-mass, sex, and body-weight data. Sex isencoded as a binary indicator for group 2, with group 1 as the reference. Body weight is included as a continuous covariate. Both covariates are included as main effects, without interactions with QTL genotype.
+
+#### Observations
+
+The common analysis sample contains 440 individuals with complete comb-mass, sex, and body-weight data: 215 in sex group 1 and 225 in sex group 2. The remaining 132 individuals were excluded because at least one required value was missing. Using this same sample for all four scans prevents differences in sample composition from affecting the covariate comparison.
