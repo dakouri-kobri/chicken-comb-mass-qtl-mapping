@@ -1428,3 +1428,61 @@ print(
 All 31 placements of Gg_rs15777012 were compared while holding the remaining markers in a fixed relative order. Placement at the beginning of chromosome 3 produced the fewest obligate crossovers (3,311). However, the beginning and end placements had the same fitted log likelihood at the displayed precision, and both retained a 1,001.51 cM interval. Placement immediately before 3_23988469 did not resolve this interval either.
 
 Thus, the preferred ordering criterion does not provide a useful estimate of this marker’s genetic position under the current model. Shorter maps obtained from some internal placements had substantially poorer likelihoods. These findings support treating Gg_rs15777012 as unresolved rather than assigning it a confident map position. They do not establish that its genotypes are erroneous.
+
+### Construct a provisional working map
+
+```{r}
+#| label: construct-provisional-working-map
+
+comb_cross_map_filtered <- drop.markers(
+  comb_cross_candidate,
+  markers = "Gg_rs15777012"
+)
+
+comb_map_filtered <- est.map(
+  comb_cross_map_filtered,
+  error.prob = 0.01,
+  map.function = "haldane",
+  offset = 0,
+  verbose = TRUE
+)
+
+comb_cross_mapped_filtered <- replace.map(
+  comb_cross_map_filtered,
+  comb_map_filtered
+)
+
+cat("Provisional map after excluding Gg_rs15777012:\n\n")
+
+summaryMap(comb_cross_mapped_filtered)
+```
+
+```{r}
+#| label: fig-provisional-working-map
+
+#| fig-cap: "Provisional genetic map with Gg_rs15777012 excluded because its placement remained unresolved."
+#| fig-width: 8
+#| fig-height: 9
+
+par(
+  mar = c(5, 5, 4, 2) + 0.1,
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+
+plotMap(
+  comb_cross_mapped_filtered,
+  shift = FALSE,
+  show.marker.names = FALSE,
+  main = "Provisional genetic map: chromosomes 1 and 3"
+)####
+```
+
+#### Observations and interpretation
+
+Excluding the unresolved marker Gg_rs15777012 reduced the estimated chromosome 3 map length from approximately 1,390.5 to 389.0 cM, removing the extreme 1,001.5 cM terminal interval. Chromosome 1 remained unchanged at approximately 151.7 cM. The provisional map contains 39 markers across the two chromosomes.
+
+Marker spacing remains uneven. Chromosome 3 retains a 101.5 cM interval between Gg_rs15282380 and 3_23988469, while several other markers have closely spaced positions. Consequently, mapping resolution will vary across the chromosomes, with greater uncertainty in sparsely covered intervals.
+
+This map will be used for subsequent analyses, with Gg_rs15777012’s exclusion documented as a limitation. Removing its problematic placement does not establish that its genotypes were erroneous or validate every remaining interval. The estimated distances also remain conditional on the F2 model used to approximate this advanced intercross.
