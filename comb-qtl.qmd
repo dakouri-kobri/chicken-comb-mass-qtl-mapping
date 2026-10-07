@@ -386,3 +386,52 @@ Overall, 842 of the 22,880 genotype entries are missing (3.68%). Missingness is 
 #### **Interpretation**
 
 The vertical bands in the plot indicate that genotype availability varies substantially between markers. Markers with high missingness provide less direct genotype information and warrant attention when examining marker order and estimating the genetic map. Because missingness alone does not establish a genotyping error or explain why the data are missing, these markers will not be removed solely on this evidence.
+
+### Extract and summarize phenotypes
+
+```{r}
+#| label: extract-comb-phenotypes
+
+phenotype_data <- data.frame(
+  id = comb_cross$pheno$id,
+  comb_mass = pull.pheno(comb_cross, pheno.col = "comb_g"),
+  body_weight = pull.pheno(comb_cross, pheno.col = "w212"),
+  sex_code = pull.pheno(comb_cross, pheno.col = "sex")
+)
+
+phenotype_data$sex_group <- factor(
+  phenotype_data$sex_code,
+  levels = c(1, 2),
+  labels = c("Sex code 1", "Sex code 2")
+)
+
+cat("Comb mass summary:\n")
+summary(phenotype_data$comb_mass)
+
+cat("\nBody weight at 212 days summary:\n")
+summary(phenotype_data$body_weight)
+
+cat("\nSex-group counts:\n")
+table(phenotype_data$sex_group, useNA = "ifany")
+```
+
+```{r}
+cat("Individuals with recorded comb mass:",
+    sum(!is.na(phenotype_data$comb_mass)), "\n")
+
+cat("Individuals with recorded body weight:",
+    sum(!is.na(phenotype_data$body_weight)), "\n")
+
+cat("Individuals with recorded sex:",
+    sum(!is.na(phenotype_data$sex_code)), "\n")
+```
+
+#### Observations
+
+Comb mass is available for 447 individuals, with 125 missing values. It ranges from 0.20 to 63.30 g, with a median of 6.00 g and a mean of 15.22 g. The middle 50% of measurements lie between 2.00 and 27.95 g.
+
+Body weight at 212 days is available for 471 individuals, with 101 missing values. It ranges from 684 to 1,999 recorded units, with a median of 1,178 and a mean of 1,199.6. There are 272 individuals with sex code 1, 299 with sex code 2, and one with missing sex information.
+
+#### Interpretation
+
+The substantially higher mean than median for comb mass suggests an asymmetric distribution toward larger values, which should be examined using the histogram and sex-group plots. Body weight has a mean closer to its median, although this alone does not establish a symmetric or normal distribution.
