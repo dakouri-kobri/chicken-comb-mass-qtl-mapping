@@ -1486,3 +1486,126 @@ Excluding the unresolved marker Gg_rs15777012 reduced the estimated chromosome 3
 Marker spacing remains uneven. Chromosome 3 retains a 101.5 cM interval between Gg_rs15282380 and 3_23988469, while several other markers have closely spaced positions. Consequently, mapping resolution will vary across the chromosomes, with greater uncertainty in sparsely covered intervals.
 
 This map will be used for subsequent analyses, with Gg_rs15777012’s exclusion documented as a limitation. Removing its problematic placement does not establish that its genotypes were erroneous or validate every remaining interval. The estimated distances also remain conditional on the F2 model used to approximate this advanced intercross.
+
+## 6. Examine possible genotyping errors
+
+Error LOD scores measure how inconsistent an observed genotype is with the surrounding marker data under the assumed map and cross model. High scores identify calls for further inspection. Closely linked markers can also produce high scores from genuine recombination events, so flagged calls should not automatically be treated as errors.
+
+### Calculate error LOD scores
+
+```{r}
+#| label: calculate-genotyping-error-lods
+
+comb_cross_errorlod <- calc.errorlod(
+  comb_cross_mapped_filtered,
+  error.prob = 0.01,
+  map.function = "haldane"
+)
+```
+
+### Identify and summarize flagged genotype calls
+
+Error LOD \> 4 as an initial screening cutoff, consistent with the package’s documentation.
+
+```{r}
+#| label: summarize-flagged-genotype-calls
+
+error_lod_cutoff <- 4
+
+error_candidates <- top.errorlod(
+  comb_cross_errorlod,
+  cutoff = error_lod_cutoff,
+  msg = FALSE
+)
+
+# Handle the possibility that no calls exceed the cutoff.
+if (is.null(error_candidates)) {
+  error_candidates <- data.frame(
+    chr = character(),
+    id = integer(),
+    marker = character(),
+    errorlod = numeric()
+  )
+}
+
+if (nrow(error_candidates) > 0L) {
+  error_candidates <- error_candidates[
+    order(-error_candidates$errorlod),
+  ]
+  
+  rownames(error_candidates) <- NULL
+}
+
+cat(
+  "Number of genotype calls with error LOD >",
+  error_lod_cutoff, ":\n"
+)
+print(nrow(error_candidates))
+
+cat("\nFlagged calls by chromosome:\n")
+
+print(
+  table(
+    factor(
+      as.character(error_candidates$chr),
+      levels = names(comb_cross_errorlod$geno)
+    )
+  )
+)
+
+cat("\nUp to 20 calls with the highest error LOD scores:\n\n")
+
+print(
+  head(error_candidates, 20),
+  row.names = FALSE,
+  digits = 5
+)
+```
+
+```{r}
+#| label: summarize-error-candidates-by-marker
+
+if (nrow(error_candidates) > 0L) {
+  
+  error_marker_summary <- do.call(
+    rbind,
+    lapply(
+      split(error_candidates, error_candidates$marker),
+      function(marker_calls) {
+        data.frame(
+          chromosome = as.character(marker_calls$chr[1]),
+          marker = as.character(marker_calls$marker[1]),
+          flagged_calls = nrow(marker_calls),
+          maximum_error_lod = max(marker_calls$errorlod)
+        )
+      }
+    )
+  )
+  
+  error_marker_summary <- error_marker_summary[
+    order(
+      -error_marker_summary$flagged_calls,
+      -error_marker_summary$maximum_error_lod
+    ),
+  ]
+  
+  rownames(error_marker_summary) <- NULL
+  
+  cat("Flagged genotype calls summarized by marker:\n\n")
+  
+  print(
+    error_marker_summary,
+    row.names = FALSE,
+    digits = 5
+  )
+  
+} else {
+  cat("No genotype calls exceeded the screening cutoff.\n")
+}
+```
+
+#### Observations and interpretation
+
+Five genotype calls exceeded the screening cutoff of error LOD 4. All occurred on chromosome 3; no chromosome 1 calls exceeded this cutoff. Four flagged calls involved Gg_rs16251229 and Gg_rs15321001 in the same two individuals, 34512 and 34134. These markers previously had identical estimated positions at the displayed precision, so their flags may reflect a shared local inconsistency rather than four independent errors. A further call was flagged at chr3_16000000 in individual 34308.
+
+These calls require inspection alongside neighboring genotypes. Error LOD scores alone cannot distinguish genotyping errors from genuine recombination, marker-order problems, or limitations of the assumed model. The absence of flags on chromosome 1 does not establish that every genotype there is correct.
