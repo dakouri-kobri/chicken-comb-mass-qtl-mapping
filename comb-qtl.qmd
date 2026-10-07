@@ -435,3 +435,31 @@ Body weight at 212 days is available for 471 individuals, with 101 missing value
 #### Interpretation
 
 The substantially higher mean than median for comb mass suggests an asymmetric distribution toward larger values, which should be examined using the histogram and sex-group plots. Body weight has a mean closer to its median, although this alone does not establish a symmetric or normal distribution.
+
+### Examine the comb-mass distribution
+
+```{r}
+#| label: fig-comb-mass-distribution
+#| fig-cap: "Distribution of the 447 recorded comb-mass measurements."
+
+hist(
+  phenotype_data$comb_mass,
+  breaks = 25,
+  col = "#0072B2",
+  border = "white",
+  main = "Distribution of chicken comb mass",
+  xlab = "Comb mass (g)",
+  ylab = "Number of individuals",
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+```
+
+#### **Observations**
+
+The histogram shows a large concentration of comb masses below 6 g, with the tallest bar covering approximately 0–2 g. Frequencies decrease sharply above this range, followed by a broader concentration around 18–40 g. Relatively few individuals have comb masses above 45 g, and the maximum is 63.30 g. The distribution is asymmetric, consistent with the mean (15.22 g) exceeding the median (6.00 g).
+
+#### **Interpretation**
+
+The low-mass concentration and broader concentration at larger values suggest that the pooled distribution may combine groups with different comb-mass distributions. Comparing the recorded sex groups will help assess whether sex contributes to this pattern.
