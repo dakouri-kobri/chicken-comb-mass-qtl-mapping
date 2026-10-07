@@ -2253,3 +2253,26 @@ legend(
 #### Observations
 
 After adjustment for sex and body weight, the chromosome 3 peak clearly exceeds the permutation threshold, whereas the chromosome 1 peak exceeds it only narrowly. The numerical scan summary places these peaks at 12.76 cM on chromosome 3 (LOD 21.448) and 125.00 cM on chromosome 1 (LOD 2.982). The plot highlights the much stronger evidence for a QTL on chromosome 3 than on chromosome 1.
+
+## 10. Fit a two-QTL model and estimate effects
+
+Before model fitting, the phenotype column `sex` is renamed `sex_code` to avoid automatic interpretation of its original 1/2 coding as R/qtl’s internal sex field. Sex remained included explicitly through the `sex_group_2` covariate.
+
+```{r}
+#| label: prepare-model-sex-coding
+
+comb_cross_model <- comb_cross_scan
+
+names(comb_cross_model$pheno)[
+  names(comb_cross_model$pheno) == "sex"
+] <- "sex_code"
+
+# Confirm that the existing sex covariate matches these individuals.
+stopifnot(
+  nrow(scan_covariates) == nind(comb_cross_model),
+  all(
+    scan_covariates[, "sex_group_2"] ==
+      as.numeric(comb_cross_model$pheno$sex_code == 2)
+  )
+)
+```
