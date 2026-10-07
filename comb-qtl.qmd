@@ -310,7 +310,7 @@ Genotype conversion preserved 8,045 AA calls, 10,031 AB calls, 3,723 BB calls, 2
 
 Phenotype missingness was also preserved: 125 individuals lack comb mass, 101 lack body weight, and one lacks sex. Sex remains coded as 1 or 2 without assigning biological labels. Although R/qtl labels the object as an F2 intercross, this is an approximate analytical representation of the F8 population and does not account for family relationships.
 
-## 3. Missing data and phenotype distributions
+## 4. Missing data and phenotype distributions
 
 ### Examine genotype missingness
 
@@ -646,3 +646,46 @@ Among the 440 individuals with complete comb-mass, body-weight, and sex records,
 #### **Interpretation**
 
 The strong pooled correlation partly reflects differences between the sex groups. Within each group, body weight has a modest positive association with comb mass. These patterns support comparing QTL scans adjusted for sex, body weight, and both covariates: adjustment will assess QTL associations after accounting for these measured differences. The correlations alone do not establish that greater body weight causes larger comb mass.
+
+## 5. Check marker order and estimate the genetic map
+
+Per the practical the marker order is checked before estimating the genetic map. Pairwise recombination fractions are examined first, followed by a comparison of alternative local marker orders.
+
+### List markers in their supplied order
+
+```{r}
+#| label: supplied-marker-order
+
+marker_order <- do.call(
+  rbind,
+  lapply(names(comb_cross$geno), function(chr) {
+    supplied_map <- comb_cross$geno[[chr]]$map
+
+    data.frame(
+      chromosome = chr,
+      chromosome_index = seq_along(supplied_map),
+      marker = names(supplied_map),
+      supplied_position = as.numeric(supplied_map)
+    )
+  })
+)
+
+marker_order$genome_index <- seq_len(nrow(marker_order))
+
+marker_order <- marker_order[
+  ,
+  c(
+    "genome_index",
+    "chromosome",
+    "chromosome_index",
+    "marker",
+    "supplied_position"
+  )
+]
+
+rownames(marker_order) <- NULL
+
+print(marker_order, row.names = FALSE)
+```
+
+The supplied positions are retained as input information.
