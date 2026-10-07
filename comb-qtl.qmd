@@ -1028,3 +1028,133 @@ The heatmap shows a more continuous region of small recombination fractions arou
 #### **Interpretation**
 
 The candidate order is a local minimum under the crossover-count criterion for the five-marker windows examined. The tied order indicates that this criterion cannot distinguish the order of the final two markers, so their current arrangement can be retained provisionally. Reordering improves the crossover count but does not resolve the unusual pairwise relationships of Gg_rs15777012 or 3_23988469. This order can therefore serve as a provisional working order for map estimation, with these marker uncertainties documented.
+
+### Estimate genetic distances
+
+Genetic distances are estimated using all available individuals and the candidate marker order. The assumed genotyping error probability is 0.01, with the Haldane map function.
+
+```{r}
+#| label: estimate-comb-genetic-map
+
+comb_map_est <- est.map(
+  comb_cross_candidate,
+  error.prob = 0.01,
+  map.function = "haldane",
+  offset = 0,
+  verbose = TRUE
+)
+```
+
+### Summarize marker positions and chromosome lengths
+
+```{r}
+#| label: summarize-comb-genetic-map
+
+estimated_marker_positions <- do.call(
+  rbind,
+  lapply(names(comb_map_est), function(chr) {
+    positions <- comb_map_est[[chr]]
+
+    data.frame(
+      chromosome = chr,
+      marker_index = seq_along(positions),
+      marker = names(positions),
+      position_cm = round(as.numeric(positions), 3)
+    )
+  })
+)
+
+rownames(estimated_marker_positions) <- NULL
+
+print(estimated_marker_positions, row.names = FALSE)
+
+map_length_summary <- do.call(
+  rbind,
+  lapply(names(comb_map_est), function(chr) {
+    positions <- as.numeric(comb_map_est[[chr]])
+
+    data.frame(
+      chromosome = chr,
+      markers = length(positions),
+      length_cm = round(diff(range(positions)), 3)
+    )
+  })
+)
+
+cat("\nEstimated chromosome lengths:\n")
+print(map_length_summary, row.names = FALSE)
+```
+
+### Inspect intervals between adjacent markers
+
+```{r}
+#| label: inspect-comb-map-intervals
+
+map_intervals <- do.call(
+  rbind,
+  lapply(names(comb_map_est), function(chr) {
+    positions <- comb_map_est[[chr]]
+    marker_names <- names(positions)
+
+    data.frame(
+      chromosome = chr,
+      left_marker = head(marker_names, -1),
+      right_marker = tail(marker_names, -1),
+      interval_cm = round(diff(as.numeric(positions)), 3)
+    )
+  })
+)
+
+map_intervals <- map_intervals[
+  order(-map_intervals$interval_cm),
+]
+
+rownames(map_intervals) <- NULL
+
+print(map_intervals, row.names = FALSE)
+```
+
+### Plot the estimated genetic map
+
+```{r}
+#| label: fig-comb-estimated-map
+#| fig-cap: "Provisional genetic map for chromosomes 1 and 3, estimated under the intercross approximation using the candidate marker order."
+#| fig-width: 8
+#| fig-height: 9
+
+par(
+  pty = "m",
+  mar = c(5, 5, 4, 2) + 0.1,
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+
+plotMap(
+  comb_map_est,
+  shift = FALSE,
+  show.marker.names = FALSE,
+  main = "Estimated genetic map: chromosomes 1 and 3"
+)
+```
+
+### Create a cross containing the estimated map
+
+```{r}
+#| label: replace-comb-genetic-map
+
+comb_cross_mapped <- replace.map(
+  comb_cross_candidate,
+  comb_map_est
+)
+```
+
+#### Observations and interpretation
+
+The estimated map spans 151.72 cM on chromosome 1 and 1,390.55 cM on chromosome 3. Chromosome 3’s unusually large length is dominated by the 1,001.51 cM interval between Gg_rs15777012 and Gg_rs14084016, which accounts for approximately 72% of its total length. This explains the large empty region in the map plot.
+
+Moving Gg_rs15777012 to the beginning of chromosome 3 reduced the number of inferred crossovers, but the resulting map shows that its placement remains problematic. A locally preferred marker order does not necessarily produce a reliable genetic map. Numerical convergence therefore does not establish that this interval represents a meaningful genetic distance.
+
+Another large interval occurs between Gg_rs15282380 and 3_23988469 (101.51 cM). In contrast, 3_23988469 and Gg_rs14327472 are separated by only 1.99 cM. This asymmetry is consistent with the earlier pairwise recombination results. The substantial missingness at 3_23988469 should also be considered when interpreting its placement.
+
+Two marker pairs have identical estimated positions at the displayed precision: Gg_rs16251229/Gg_rs15321001 and Gg_rs16289999/Gg_rs14368844. These positions indicate that the analysis did not resolve their separation; they do not, by themselves, establish that the markers have identical genotypes.
