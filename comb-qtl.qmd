@@ -915,3 +915,116 @@ For Gg_rs15777012, estimated recombination fractions with its supplied neighbors
 Gg_rs15777012 shows little evidence of linkage to its immediate neighbors under the supplied coding, supporting further investigation of its placement. In contrast, 3_23988469 has a strongly asymmetric neighboring-marker pattern: a high estimated fraction with Gg_rs15282380 but a small fraction with Gg_rs14327472. It is therefore not weakly linked to both neighbors.
 
 Estimates above 0.5 should not be interpreted as genetic distances or as more than 50% observable recombination in a conventional linkage map. They warrant investigation of coding, placement, and the cross-model approximation. The negative allele check provides no support for automatically reversing the coding, but it does not rule out all genotype problems, particularly given the practical’s warning about linkage LOD behavior in this advanced intercross.
+
+### Apply the candidate chromosome 3 order
+
+The leading alternative from the initial local-order search is tested in a separate cross object.
+
+```{r}
+#| label: apply-candidate-chr3-order
+
+candidate_order_chr3 <- c(
+  3L,
+  1L,
+  2L,
+  seq.int(4L, nmar(comb_cross_rf)[["3"]])
+)
+
+comb_cross_candidate <- switch.order(
+  comb_cross_rf,
+  chr = "3",
+  order = candidate_order_chr3,
+  error.prob = 0.01,
+  map.function = "haldane"
+)
+
+candidate_marker_order <- data.frame(
+  candidate_index = seq_along(candidate_order_chr3),
+  original_index = candidate_order_chr3,
+  marker = colnames(comb_cross_candidate$geno[["3"]]$data)
+)
+
+print(candidate_marker_order, row.names = FALSE)
+```
+
+### Compare crossover counts before and after rearrangement
+
+```{r}
+#| label: compare-candidate-crossover-counts
+
+crossover_comparison <- data.frame(
+  chromosome = c("1", "3"),
+  supplied_order = c(
+    sum(countXO(comb_cross_rf, chr = "1")),
+    sum(countXO(comb_cross_rf, chr = "3"))
+  ),
+  candidate_order = c(
+    sum(countXO(comb_cross_candidate, chr = "1")),
+    sum(countXO(comb_cross_candidate, chr = "3"))
+  )
+)
+
+crossover_comparison$reduction <- with(
+  crossover_comparison,
+  supplied_order - candidate_order
+)
+
+print(crossover_comparison, row.names = FALSE)
+```
+
+### Examine recombination under the candidate order
+
+```{r}
+#| label: fig-comb-candidate-recombination-chr3
+#| fig-cap: "Pairwise recombination fractions on chromosome 3 after moving Gg_rs15777012 to the beginning of the marker order."
+#| fig-width: 9
+#| fig-height: 9
+
+par(
+  pty = "s",
+  mar = c(5, 5, 4, 2) + 0.1,
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+
+plotRF(
+  comb_cross_candidate,
+  chr = "3",
+  what = "rf",
+  col.scheme = "viridis",
+  main = "Chromosome 3: candidate marker order"
+)
+```
+
+### Check for further local-order improvements
+
+The local-order search is repeated around the candidate order. This allows additional rearrangements to be assessed after the first change.
+
+```{r}
+#| label: recheck-candidate-chr3-order
+
+ripple_chr3_candidate <- ripple(
+  comb_cross_candidate,
+  chr = "3",
+  window = 5,
+  method = "countxo"
+)
+
+print(
+  unclass(summary(ripple_chr3_candidate)),
+  max = 100000
+)
+```
+
+#### **Observations**
+
+Moving Gg_rs15777012 from position 3 to position 1 reduces the chromosome 3 crossover count from 3,705 to 3,311, a reduction of 394 (10.6%). Chromosome 1 remains unchanged at 1,261.
+
+The repeated local-order search evaluates 2,616 orders and finds no further improvement. One alternative also requires 3,311 crossovers: it exchanges candidate positions 30 (Gg_rs16289999) and 31 (Gg_rs14368844). Another reported alternative exchanges positions 13 (Gg_rs15321001) and 14 (3_36969573) and requires 3,313 crossovers, two more than the candidate order.
+
+The heatmap shows a more continuous region of small recombination fractions around positions 2–7. However, Gg_rs15777012, now at position 1, retains its dark row and column, and 3_23988469, still at position 8, continues to interrupt the neighboring-marker pattern.
+
+#### **Interpretation**
+
+The candidate order is a local minimum under the crossover-count criterion for the five-marker windows examined. The tied order indicates that this criterion cannot distinguish the order of the final two markers, so their current arrangement can be retained provisionally. Reordering improves the crossover count but does not resolve the unusual pairwise relationships of Gg_rs15777012 or 3_23988469. This order can therefore serve as a provisional working order for map estimation, with these marker uncertainties documented.
