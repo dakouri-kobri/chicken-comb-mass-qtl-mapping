@@ -1251,3 +1251,180 @@ print(
 Gg_rs15777012 has its smallest estimated recombination fraction with 3_23988469 (0.2398), whereas its relationship with its current neighboring marker, Gg_rs14084016, has an estimated recombination fraction of 0.5532. This supports questioning its placement at the beginning of chromosome 3 and helps explain the extremely large first interval in the estimated map.
 
 However, the relationship with 3_23988469 does not establish a precise alternative position. It is based on 312 jointly typed individuals, and comparable close linkage is not evident with the surrounding markers. Overall, 26 of the 30 pairwise estimates exceed 0.5. The marker therefore remains difficult to place reliably under the current analysis. These results alone do not establish a genotyping error or justify reversing its allele coding.
+
+### Compare all placements of Gg_rs15777012
+
+```{r}
+#| label: compare-problem-marker-placements
+
+problem_marker <- "Gg_rs15777012"
+
+original_chr3_markers <- colnames(
+  comb_cross_rf$geno[["3"]]$data
+)
+
+candidate_chr3_markers <- colnames(
+  comb_cross_candidate$geno[["3"]]$data
+)
+
+stopifnot(
+  problem_marker %in% original_chr3_markers,
+  setequal(original_chr3_markers, candidate_chr3_markers)
+)
+
+# Keep the other markers in their current relative order.
+remaining_markers <- candidate_chr3_markers[
+  candidate_chr3_markers != problem_marker
+]
+
+remaining_indices <- match(
+  remaining_markers,
+  original_chr3_markers
+)
+
+problem_index <- match(
+  problem_marker,
+  original_chr3_markers
+)
+
+n_chr3_markers <- length(original_chr3_markers)
+
+# Give every trial the same starting map: 1 cM intervals.
+# These are starting values, not the final estimated distances.
+placement_start_map <- pull.map(comb_cross_rf)
+
+placement_start_map[["3"]] <- setNames(
+  seq_len(n_chr3_markers) - 1,
+  original_chr3_markers
+)
+
+placement_base <- replace.map(
+  comb_cross_rf,
+  placement_start_map
+)
+
+# Fit each possible placement.
+placement_trials <- lapply(
+  seq_len(n_chr3_markers),
+  function(position) {
+    
+    trial_order <- append(
+      remaining_indices,
+      problem_index,
+      after = position - 1L
+    )
+    
+    ordered_markers <- original_chr3_markers[trial_order]
+    
+    trial_cross <- switch.order(
+      placement_base,
+      chr = "3",
+      order = trial_order,
+      error.prob = 0.01,
+      map.function = "haldane",
+      maxit = 10000
+    )
+    
+    # Obtain the fitted map and its log-likelihood attribute.
+    trial_map <- est.map(
+      trial_cross,
+      chr = "3",
+      error.prob = 0.01,
+      map.function = "haldane",
+      offset = 0,
+      maxit = 10000,
+      verbose = FALSE
+    )
+    
+    chr3_map <- trial_map[["3"]]
+    
+    trial_summary <- data.frame(
+      position = position,
+      left_marker = if (position == 1L) {
+        "(start)"
+      } else {
+        ordered_markers[position - 1L]
+      },
+      right_marker = if (position == n_chr3_markers) {
+        "(end)"
+      } else {
+        ordered_markers[position + 1L]
+      },
+      crossovers = sum(countXO(trial_cross, chr = "3")),
+      length_cm = diff(range(chr3_map)),
+      largest_interval_cm = max(diff(chr3_map)),
+      loglik = as.numeric(attr(chr3_map, "loglik"))
+    )
+    
+    list(
+      order = trial_order,
+      map = trial_map,
+      summary = trial_summary
+    )
+  }
+)
+
+placement_comparison <- do.call(
+  rbind,
+  lapply(placement_trials, function(trial) trial$summary)
+)
+
+# Express each fit's likelihood deficit in base-10 units.
+best_loglik <- max(placement_comparison$loglik)
+
+placement_comparison$lod_below_best <- (
+  best_loglik - placement_comparison$loglik
+) / log(10)
+
+# Rank by likelihood, retaining the position identifier.
+placement_ranked <- placement_comparison[
+  order(
+    placement_comparison$lod_below_best,
+    placement_comparison$crossovers,
+    placement_comparison$position
+  ),
+]
+
+rownames(placement_ranked) <- NULL
+```
+
+```{r}
+#| label: summarize-marker-placement-comparison
+
+cat("Marker placement and obligate crossover counts:\n\n")
+
+print(
+  placement_ranked[
+    , c("position", "left_marker", "right_marker", "crossovers")
+  ],
+  row.names = FALSE
+)
+
+cat("\nMap fit and interval lengths for the same placements:\n\n")
+
+placement_fit_display <- placement_ranked[
+  , c(
+    "position",
+    "length_cm",
+    "largest_interval_cm",
+    "loglik",
+    "lod_below_best"
+  )
+]
+
+placement_fit_display[, -1] <- round(
+  placement_fit_display[, -1],
+  3
+)
+
+print(
+  placement_fit_display,
+  row.names = FALSE
+)
+```
+
+#### **Observations and interpretation**
+
+All 31 placements of Gg_rs15777012 were compared while holding the remaining markers in a fixed relative order. Placement at the beginning of chromosome 3 produced the fewest obligate crossovers (3,311). However, the beginning and end placements had the same fitted log likelihood at the displayed precision, and both retained a 1,001.51 cM interval. Placement immediately before 3_23988469 did not resolve this interval either.
+
+Thus, the preferred ordering criterion does not provide a useful estimate of this marker’s genetic position under the current model. Shorter maps obtained from some internal placements had substantially poorer likelihoods. These findings support treating Gg_rs15777012 as unresolved rather than assigning it a confident map position. They do not establish that its genotypes are erroneous.
