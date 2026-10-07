@@ -689,3 +689,46 @@ print(marker_order, row.names = FALSE)
 ```
 
 The supplied positions are retained as input information.
+
+### Calculate pairwise recombination fractions
+
+```{r}
+#| label: estimate-comb-recombination
+
+comb_cross_rf <- est.rf(comb_cross)
+```
+
+### Examine recombination across both chromosomes
+
+```{r}
+#| label: fig-comb-pairwise-recombination
+#| fig-cap: "Estimated pairwise recombination fractions for markers on chromosomes 1 and 3, in the supplied order."
+#| fig-width: 9
+#| fig-height: 9
+
+par(
+  pty = "s",
+  mar = c(5, 5, 4, 2) + 0.1,
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+
+plotRF(
+  comb_cross_rf,
+  chr = c(1, 3),
+  what = "rf",
+  col.scheme = "viridis",
+  main = "Pairwise recombination: chromosomes 1 and 3"
+)
+```
+
+#### **Observations**
+
+Markers 1–9 belong to chromosome 1, and markers 10–40 belong to chromosome 3. The blocks comparing markers between chromosomes are predominantly purple, indicating larger estimated recombination fractions and little apparent linkage between the two chromosomes.
+
+Within chromosome 1, a relatively continuous yellow band follows the diagonal, with colors generally becoming darker farther from it. Chromosome 3 also shows groups of nearby markers with small recombination fractions, but its diagonal pattern is interrupted. In particular, genome-wide marker indices 12 (Gg_rs15777012) and 17 (3_23988469) show dark rows and columns contrasting with the surrounding regions of stronger linkage.
+
+#### **Interpretation**
+
+The overall pattern supports the supplied chromosome grouping, but the interruptions on chromosome 3 warrant closer examination of marker order and genotype quality. Marker 3_23988469 also has the highest missingness (45.28%), whereas Gg_rs15777012 has only 0.87% missingness. Thus, high missingness alone cannot explain all the unusual patterns. The chromosome-specific plots and alternative-order comparisons are needed before deciding whether to revise the marker order.
