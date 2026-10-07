@@ -2120,3 +2120,63 @@ cat("Model-specific 5% thresholds across chromosomes 1 and 3:\n\n")
 
 print(threshold_display, row.names = FALSE)
 ```
+
+### Evaluate the chromosome-specific peaks
+
+```{r}
+#| label: evaluate-scan-peak-significance
+
+scan_significance <- do.call(
+  rbind,
+  lapply(
+    seq_along(scan_results),
+    function(i) {
+      
+      peaks <- summary(
+        scan_results[[i]],
+        perms = permutation_results[[i]],
+        pvalues = TRUE
+      )
+      
+      model_threshold <- permutation_thresholds$lod_5_percent[i]
+      
+      data.frame(
+        scan = names(scan_results)[i],
+        chromosome = as.character(peaks$chr),
+        position_cm = peaks$pos,
+        lod = peaks[, 3],
+        lod_threshold = model_threshold,
+        adjusted_p = peaks[, 4],
+        exceeds_threshold = peaks[, 3] > model_threshold
+      )
+    }
+  )
+)
+
+rownames(scan_significance) <- NULL
+
+significance_display <- scan_significance
+
+significance_display$position_cm <- round(
+  significance_display$position_cm,
+  2
+)
+
+significance_display$lod <- round(
+  significance_display$lod,
+  3
+)
+
+significance_display$lod_threshold <- round(
+  significance_display$lod_threshold,
+  3
+)
+
+cat("Chromosome peaks and permutation-based significance:\n\n")
+
+print(
+  significance_display,
+  row.names = FALSE,
+  digits = 4
+)
+```
