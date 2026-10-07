@@ -247,3 +247,43 @@ stopifnot(
 
 cat("Cross dimensions and individual order are consistent.\n")
 ```
+
+### Validate genotype conversion
+
+```{r}
+#| label: validate-genotype-conversion
+
+imported_genotypes <- unlist(
+  lapply(comb_cross$geno, function(chromosome) {
+    as.vector(chromosome$data)
+  }),
+  use.names = FALSE
+)
+
+cat("Imported genotype counts:\n")
+table(
+  factor(imported_genotypes, levels = 1:5),
+  useNA = "ifany"
+)
+
+expected_counts <- c(
+  sum(genotype_codes == "A"),
+  sum(genotype_codes == "H"),
+  sum(genotype_codes == "B"),
+  sum(genotype_codes == "D"),
+  sum(genotype_codes == "C")
+)
+
+observed_counts <- tabulate(
+  imported_genotypes[!is.na(imported_genotypes)],
+  nbins = 5
+)
+
+stopifnot(
+  all(observed_counts == expected_counts),
+  sum(is.na(imported_genotypes)) ==
+    sum(genotype_codes %in% c("-", "NA", ""))
+)
+
+cat("\nGenotype conversion preserves the input counts.\n")
+```
