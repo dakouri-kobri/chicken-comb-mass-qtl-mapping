@@ -1609,3 +1609,101 @@ if (nrow(error_candidates) > 0L) {
 Five genotype calls exceeded the screening cutoff of error LOD 4. All occurred on chromosome 3; no chromosome 1 calls exceeded this cutoff. Four flagged calls involved Gg_rs16251229 and Gg_rs15321001 in the same two individuals, 34512 and 34134. These markers previously had identical estimated positions at the displayed precision, so their flags may reflect a shared local inconsistency rather than four independent errors. A further call was flagged at chr3_16000000 in individual 34308.
 
 These calls require inspection alongside neighboring genotypes. Error LOD scores alone cannot distinguish genotyping errors from genuine recombination, marker-order problems, or limitations of the assumed model. The absence of flags on chromosome 1 does not establish that every genotype there is correct.
+
+### Inspect flagged genotype patterns
+
+The individual IDs, 34512, 34134, and 34308, are matched to the cross before passing individuals to `plotGeno()`
+
+```{r}
+#| label: locate-flagged-individuals-and-markers
+
+flagged_ids <- unique(as.character(error_candidates$id))
+
+cross_ids <- as.character(comb_cross_errorlod$pheno$id)
+
+flagged_rows <- match(flagged_ids, cross_ids)
+
+stopifnot(!anyNA(flagged_rows))
+
+flagged_individuals <- data.frame(
+  individual_id = flagged_ids,
+  cross_row = flagged_rows
+)
+
+cat("Flagged individuals and their cross row indices:\n\n")
+
+print(flagged_individuals, row.names = FALSE)
+
+# Identify the flagged markers in the current, filtered map.
+chr3_map <- pull.map(
+  comb_cross_errorlod,
+  chr = "3"
+)[["3"]]
+
+flagged_markers <- unique(
+  as.character(error_candidates$marker)
+)
+
+flagged_marker_positions <- data.frame(
+  marker = flagged_markers,
+  marker_index = match(flagged_markers, names(chr3_map)),
+  position_cm = round(
+    as.numeric(chr3_map[flagged_markers]),
+    3
+  )
+)
+
+flagged_marker_positions <- flagged_marker_positions[
+  order(flagged_marker_positions$marker_index),
+]
+
+cat("\nFlagged marker indices and estimated positions:\n\n")
+
+print(flagged_marker_positions, row.names = FALSE)
+```
+
+Plot chromosome 3 for these three individuals
+
+```{r}
+#| label: fig-flagged-chr3-genotypes
+#| fig-cap: "Chromosome 3 genotype patterns for the three individuals with flagged calls. The screening cutoff is error LOD > 4."
+#| fig-width: 12
+#| fig-height: 6
+#| out-width: "100%"
+
+previous_par <- par(
+  oma = c(0, 0, 3, 0)
+)
+
+plotGeno(
+  comb_cross_errorlod,
+  chr = "3",
+  ind = flagged_rows,
+  horizontal = TRUE,
+  include.xo = TRUE,
+  cutoff = error_lod_cutoff,
+  min.sep = 2,
+  cex = 1.1
+)
+
+mtext(
+  "Chromosome 3: genotype calls requiring inspection",
+  side = 3,
+  outer = TRUE,
+  line = 1,
+  font = 2,
+  cex = 1.2
+)
+
+par(previous_par)
+```
+
+#### Observations and interpretation
+
+In individual 34512, Gg_rs16251229 has an H genotype between A calls at neighboring markers. This isolated change is suspicious because it requires additional recombination events to explain the local pattern. Both Gg_rs16251229 and Gg_rs15321001 are flagged, although the visible isolated change occurs at Gg_rs16251229.
+
+In individual 34134, the same marker pair marks an A-to-H transition, with H calls continuing at subsequent markers. This pattern could represent a genuine recombination event. However, Gg_rs16251229 and Gg_rs15321001 have the same estimated position at the displayed precision (277.806 cM), making their differing calls highly inconsistent with the fitted map. The paired flags therefore do not establish which call, if either, is erroneous.
+
+In individual 34308, chr3_16000000 has a B genotype between A calls at Gg_rs15749695 and 3_16300000. This isolated change is another candidate genotyping error, but genotype validation would be needed to confirm it.
+
+Overall, the five flags identify local inconsistencies requiring attention rather than five confirmed errors. Their interpretation remains conditional on marker spacing, the provisional map, and the cross model.
