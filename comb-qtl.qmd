@@ -2084,3 +2084,39 @@ names(permutation_results) <- names(scan_results)
 ```
 
 For each covariate model, 1,000 Haley–Knott permutations were performed using the common analysis sample and matching covariates. A separate 5% significance threshold was estimated from the maximum LOD scores across chromosomes 1 and 3. Fixed random seeds were used for reproducibility. These standard permutations do not account for the reported family relationships in the advanced intercross, so their significance calibration is approximate.
+
+### Estimate the 5% LOD thresholds
+
+```{r}
+#| label: summarize-permutation-thresholds
+
+permutation_thresholds <- data.frame(
+  scan = names(permutation_results),
+  permutations = vapply(
+    permutation_results,
+    nrow,
+    integer(1)
+  ),
+  lod_5_percent = vapply(
+    permutation_results,
+    function(result) {
+      as.numeric(
+        summary(result, alpha = 0.05)
+      )[1]
+    },
+    numeric(1)
+  ),
+  row.names = NULL
+)
+
+threshold_display <- permutation_thresholds
+
+threshold_display$lod_5_percent <- round(
+  threshold_display$lod_5_percent,
+  3
+)
+
+cat("Model-specific 5% thresholds across chromosomes 1 and 3:\n\n")
+
+print(threshold_display, row.names = FALSE)
+```
