@@ -301,3 +301,11 @@ colSums(
 cat("\nImported sex codes:\n")
 table(comb_cross$pheno$sex, useNA = "ifany")
 ```
+
+#### **Observations and interpretation**
+
+The imported cross contains 572 individuals and 40 markers across chromosomes 1 and 3, with 9 and 31 markers respectively. Validation confirmed that the dimensions and individual order match the original dataset.
+
+Genotype conversion preserved 8,045 AA calls, 10,031 AB calls, 3,723 BB calls, 239 ambiguous AB-or-BB calls, and 842 missing entries. Under the adopted standard R/qtl coding convention, the original C entries were retained as ambiguous genotypes rather than discarded. Overall, 96.3% of marker–individual combinations have recorded genotype information.
+
+Phenotype missingness was also preserved: 125 individuals lack comb mass, 101 lack body weight, and one lacks sex. Sex remains coded as 1 or 2 without assigning biological labels. Although R/qtl labels the object as an F2 intercross, this is an approximate analytical representation of the F8 population and does not account for family relationships.
