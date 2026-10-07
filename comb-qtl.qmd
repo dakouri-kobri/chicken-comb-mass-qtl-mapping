@@ -463,3 +463,62 @@ The histogram shows a large concentration of comb masses below 6 g, with the tal
 #### **Interpretation**
 
 The low-mass concentration and broader concentration at larger values suggest that the pooled distribution may combine groups with different comb-mass distributions. Comparing the recorded sex groups will help assess whether sex contributes to this pattern.
+
+### Compare comb mass between sex groups
+
+Sex groups retain their original codes because their biological labels have not yet been confirmed.
+
+```{r}
+#| label: fig-comb-mass-by-sex
+#| fig-cap: "Comb mass grouped by the recorded sex codes."
+
+boxplot(
+  comb_mass ~ sex_group,
+  data = phenotype_data,
+  col = c("#0072B2", "#D55E00"),
+  main = "Comb mass by sex group",
+  xlab = "Recorded sex group",
+  ylab = "Comb mass (g)",
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+```
+
+```{r}
+#| label: comb-mass-summary-by-sex
+
+sex_summary <- do.call(
+  rbind,
+  lapply(levels(phenotype_data$sex_group), function(group) {
+    values <- phenotype_data$comb_mass[
+      which(phenotype_data$sex_group == group)
+    ]
+
+    values <- values[!is.na(values)]
+
+    data.frame(
+      sex_group = group,
+      observed = length(values),
+      mean = mean(values),
+      median = median(values),
+      sd = sd(values)
+    )
+  })
+)
+
+sex_summary[, c("mean", "median", "sd")] <- round(
+  sex_summary[, c("mean", "median", "sd")],
+  2
+)
+
+print(sex_summary, row.names = FALSE)
+```
+
+#### **Observations**
+
+Comb mass differs markedly between the recorded sex groups. Among 216 individuals with sex code 1, the mean is 28.92 g, the median is 28.50 g, and the standard deviation is 10.08 g. Among 231 individuals with sex code 2, the corresponding values are 2.42 g, 2.00 g, and 1.63 g. The difference in mean comb mass is 26.50 g. The boxplot shows substantially larger comb masses and greater absolute variability in sex code 1, with some overlap between the groups. Both groups contain observations above their upper whiskers.
+
+#### **Interpretation**
+
+The pronounced separation between sex groups helps explain the two concentrations in the pooled comb-mass histogram. Sex is therefore an important covariate to consider when comparing QTL scans with and without adjustment. Points beyond the boxplot whiskers are unusual within their group but do not, by themselves, indicate measurement errors. The groups remain labeled by their recorded codes until the male/female coding is confirmed.
