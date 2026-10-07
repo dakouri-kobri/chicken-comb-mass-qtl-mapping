@@ -1158,3 +1158,96 @@ Moving Gg_rs15777012 to the beginning of chromosome 3 reduced the number of infe
 Another large interval occurs between Gg_rs15282380 and 3_23988469 (101.51 cM). In contrast, 3_23988469 and Gg_rs14327472 are separated by only 1.99 cM. This asymmetry is consistent with the earlier pairwise recombination results. The substantial missingness at 3_23988469 should also be considered when interpreting its placement.
 
 Two marker pairs have identical estimated positions at the displayed precision: Gg_rs16251229/Gg_rs15321001 and Gg_rs16289999/Gg_rs14368844. These positions indicate that the analysis did not resolve their separation; they do not, by themselves, establish that the markers have identical genotypes.
+
+### Examine linkage of the problematic chromosome 3 marker
+
+```{r}
+#| label: inspect-problematic-marker
+
+problem_marker <- "Gg_rs15777012"
+
+# Use the preserved cross with the original marker order.
+chr3_genotypes <- comb_cross_rf$geno[["3"]]$data
+chr3_markers <- colnames(chr3_genotypes)
+
+stopifnot(problem_marker %in% chr3_markers)
+
+chr3_rf <- pull.rf(
+  comb_cross_rf,
+  what = "rf",
+  chr = "3"
+)
+
+chr3_linkage_lod <- pull.rf(
+  comb_cross_rf,
+  what = "lod",
+  chr = "3"
+)
+
+# Count individuals with nonmissing genotype calls at both markers.
+problem_genotypes <- chr3_genotypes[, problem_marker]
+
+jointly_typed <- vapply(
+  chr3_markers,
+  function(marker) {
+    sum(
+      !is.na(problem_genotypes) &
+        !is.na(chr3_genotypes[, marker])
+    )
+  },
+  integer(1)
+)
+
+candidate_chr3_markers <- colnames(
+  comb_cross_candidate$geno[["3"]]$data
+)
+
+problem_marker_linkage <- data.frame(
+  marker = chr3_markers,
+  original_index = seq_along(chr3_markers),
+  candidate_index = match(
+    chr3_markers,
+    candidate_chr3_markers
+  ),
+  jointly_typed = unname(jointly_typed),
+  recombination_fraction = as.numeric(
+    chr3_rf[problem_marker, chr3_markers]
+  ),
+  linkage_lod = as.numeric(
+    chr3_linkage_lod[problem_marker, chr3_markers]
+  )
+)
+
+# Remove the marker's comparison with itself.
+problem_marker_linkage <- problem_marker_linkage[
+  problem_marker_linkage$marker != problem_marker,
+]
+
+# Show the smallest recombination fractions first.
+problem_marker_linkage <- problem_marker_linkage[
+  order(
+    problem_marker_linkage$recombination_fraction,
+    -problem_marker_linkage$linkage_lod,
+    na.last = TRUE
+  ),
+]
+
+rownames(problem_marker_linkage) <- NULL
+
+cat(
+  "Pairwise linkage of", problem_marker,
+  "with the other chromosome 3 markers:\n\n"
+)
+
+print(
+  problem_marker_linkage,
+  row.names = FALSE,
+  digits = 4
+)
+```
+
+#### **Observations and interpretation**
+
+Gg_rs15777012 has its smallest estimated recombination fraction with 3_23988469 (0.2398), whereas its relationship with its current neighboring marker, Gg_rs14084016, has an estimated recombination fraction of 0.5532. This supports questioning its placement at the beginning of chromosome 3 and helps explain the extremely large first interval in the estimated map.
+
+However, the relationship with 3_23988469 does not establish a precise alternative position. It is based on 312 jointly typed individuals, and comparable close linkage is not evident with the surrounding markers. Overall, 26 of the 30 pairwise estimates exceed 0.5. The marker therefore remains difficult to place reliably under the current analysis. These results alone do not establish a genotyping error or justify reversing its allele coding.
