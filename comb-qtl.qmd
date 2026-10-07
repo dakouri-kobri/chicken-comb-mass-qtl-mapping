@@ -1707,3 +1707,97 @@ In individual 34134, the same marker pair marks an A-to-H transition, with H cal
 In individual 34308, chr3_16000000 has a B genotype between A calls at Gg_rs15749695 and 3_16300000. This isolated change is another candidate genotyping error, but genotype validation would be needed to confirm it.
 
 Overall, the five flags identify local inconsistencies requiring attention rather than five confirmed errors. Their interpretation remains conditional on marker spacing, the provisional map, and the cross model.
+
+## 7. Calculate genotype probabilities
+
+### Calculate conditional genotype probabilities
+
+```{r}
+#| label: calculate-genotype-probabilities
+
+comb_cross_genoprob <- calc.genoprob(
+  comb_cross_errorlod,
+  step = 1,
+  off.end = 0,
+  error.prob = 0.01,
+  map.function = "haldane",
+  stepwidth = "fixed"
+)
+```
+
+Conditional genotype probabilities were calculated on a 1 cM grid using the provisional genetic map, the Haldane map function, and an assumed genotyping error probability of 0.01. The observed genotype calls, including the five calls flagged in Section 5, were retained. These probabilities remain conditional on the F2 approximation used for this advanced intercross. The 1 cM grid defines the spacing of scan evaluations; it does not imply 1 cM mapping resolution.
+
+### Check the probability arrays
+
+Each chromosome’s probability array has dimensions:
+
+individuals × evaluated positions × genotype states
+
+The F2 model has three genotype states. Evaluated positions include intermediate scan positions as well as marker locations.
+
+```{r}
+#| label: summarize-genotype-probabilities
+
+genoprob_summary <- do.call(
+  rbind,
+  lapply(
+    names(comb_cross_genoprob$geno),
+    function(chr) {
+      
+      probability_array <- comb_cross_genoprob$geno[[chr]]$prob
+      
+      probability_sums <- apply(
+        probability_array,
+        c(1, 2),
+        sum
+      )
+      
+      data.frame(
+        chromosome = chr,
+        individuals = dim(probability_array)[1],
+        evaluated_positions = dim(probability_array)[2],
+        genotype_states = dim(probability_array)[3],
+        maximum_sum_deviation = max(
+          abs(probability_sums - 1)
+        )
+      )
+    }
+  )
+)
+
+rownames(genoprob_summary) <- NULL
+
+cat("Genotype probability array dimensions and normalization:\n\n")
+
+print(
+  genoprob_summary,
+  row.names = FALSE,
+  digits = 4
+)
+
+cat("\nNumber of observed markers retained:\n")
+
+print(nmar(comb_cross_genoprob))
+```
+
+#### Observations and interpretation
+
+Genotype probabilities were calculated for all 572 individuals at 160 positions on chromosome 1 and 419 positions on chromosome 3. Each position has three possible genotype states under the F2 model. The probabilities sum to one within numerical precision, and all 39 markers in the provisional map were retained. These checks confirm the expected array structure and normalization; they do not validate the underlying map or cross-model assumptions.
+
+### Simulate genotypes for multiple imputation
+
+```{r}
+#| label: simulate-genotypes
+
+set.seed(20261007)
+
+comb_cross_imputed <- sim.geno(
+  comb_cross_genoprob,
+  n.draws = 64,
+  step = 1,
+  off.end = 0,
+  error.prob = 0.01,
+  map.function = "haldane",
+  stepwidth = "fixed"
+)
+```
