@@ -2025,3 +2025,62 @@ Chromosome 1 shows a weaker and less consistent pattern. The unadjusted and sex-
 The increased chromosome 3 LOD is consistent with adjustment removing substantial background variation associated with sex and body weight, making the genotype-associated component of comb-mass variation easier to detect. The relatively stable peak position supports a consistent localization across these models. However, LOD differences alone do not establish the biological mechanism or quantify the variance explained by either covariate.
 
 The chromosome 1 results show that adjustment does not uniformly strengthen QTL evidence. Its changing maximum warrants more cautious localization. All results remain conditional on the provisional map and F2 approximation. Statistical significance must be assessed using permutation thresholds for the corresponding models over the scanned chromosomes 1 and 3.
+
+## 9. Assess QTL significance by permutation
+
+1,000 permutations will be run for each of the four scans, using the same 440 individuals and each scan’s corresponding covariates.
+
+### Perform permutations for each model
+
+```{r}
+#| label: covariate-scan-permutations
+
+n_permutations <- 1000
+
+permutation_covariates <- list(
+  "Unadjusted" = NULL,
+  "Sex" = scan_covariates[
+    , "sex_group_2", drop = FALSE
+  ],
+  "Body weight" = scan_covariates[
+    , "body_weight", drop = FALSE
+  ],
+  "Sex + body weight" = scan_covariates
+)
+
+stopifnot(
+  identical(
+    names(permutation_covariates),
+    names(scan_results)
+  )
+)
+
+permutation_results <- lapply(
+  seq_along(scan_results),
+  function(i) {
+    
+    set.seed(20261007 + i - 1L)
+    
+    cat(
+      "\nRunning permutations for:",
+      names(scan_results)[i],
+      "\n"
+    )
+    
+    scanone(
+      comb_cross_scan,
+      chr = c("1", "3"),
+      pheno.col = "comb_g",
+      method = "hk",
+      model = "normal",
+      addcovar = permutation_covariates[[i]],
+      n.perm = n_permutations,
+      verbose = TRUE
+    )
+  }
+)
+
+names(permutation_results) <- names(scan_results)
+```
+
+For each covariate model, 1,000 Haley–Knott permutations were performed using the common analysis sample and matching covariates. A separate 5% significance threshold was estimated from the maximum LOD scores across chromosomes 1 and 3. Fixed random seeds were used for reproducibility. These standard permutations do not account for the reported family relationships in the advanced intercross, so their significance calibration is approximate.
