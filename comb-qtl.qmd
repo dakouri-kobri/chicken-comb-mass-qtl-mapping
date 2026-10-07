@@ -838,3 +838,80 @@ print(
 #### **Interpretation**
 
 The strongest improvement involves repositioning Gg_rs15777012, consistent with its unusual pattern in the recombination heatmap. The four-crossover difference between the two leading orders provides limited discrimination between the arrangements of markers 4 and 5. However, this local search does not establish the globally optimal chromosome order. Retention of 3_23988469 in every reported alternative does not confirm its placement: its unusual recombination pattern remains unresolved and requires further investigation. Allele coding should be checked before adopting a revised order.
+
+### Check for possible reversed allele coding
+
+This diagnostic checks whether reversing allele coding at a marker would increase its strongest pairwise linkage LOD score.
+
+```{r}
+#| label: check-comb-allele-coding
+
+allele_check <- checkAlleles(
+  comb_cross_rf,
+  threshold = 3,
+  verbose = TRUE
+)
+
+if (!is.null(allele_check) && nrow(allele_check) > 0) {
+  print(allele_check, row.names = FALSE)
+}
+```
+
+### Inspect recombination fractions around suspicious markers
+
+The numerical estimates are examined for chromosome 3 markers Gg_rs15777012 and 3_23988469 and their immediate neighbors in the supplied order.
+
+```{r}
+#| label: inspect-suspicious-marker-recombination
+
+rf_chr3 <- pull.rf(
+  comb_cross_rf,
+  chr = "3",
+  what = "rf"
+)
+
+neighbor_pairs <- data.frame(
+  focal_marker = c(
+    "Gg_rs15777012",
+    "Gg_rs15777012",
+    "3_23988469",
+    "3_23988469"
+  ),
+  neighboring_marker = c(
+    "Gg_rs15015376",
+    "chr3_16000000",
+    "Gg_rs15282380",
+    "Gg_rs14327472"
+  )
+)
+
+neighbor_pairs$estimated_rf <- vapply(
+  seq_len(nrow(neighbor_pairs)),
+  function(i) {
+    rf_chr3[
+      neighbor_pairs$focal_marker[i],
+      neighbor_pairs$neighboring_marker[i]
+    ]
+  },
+  numeric(1)
+)
+
+neighbor_pairs$estimated_rf <- round(
+  neighbor_pairs$estimated_rf,
+  4
+)
+
+print(neighbor_pairs, row.names = FALSE)
+```
+
+#### **Observations**
+
+The allele-coding check returned “No apparent problems,” meaning that no marker met the specified threshold of a three-unit increase in maximum pairwise linkage LOD after reversing its allele coding.
+
+For Gg_rs15777012, estimated recombination fractions with its supplied neighbors are 0.5454 with Gg_rs15015376 and 0.5292 with chr3_16000000. For 3_23988469, the corresponding estimates are 0.6889 with Gg_rs15282380 and 0.0355 with Gg_rs14327472.
+
+#### **Interpretation**
+
+Gg_rs15777012 shows little evidence of linkage to its immediate neighbors under the supplied coding, supporting further investigation of its placement. In contrast, 3_23988469 has a strongly asymmetric neighboring-marker pattern: a high estimated fraction with Gg_rs15282380 but a small fraction with Gg_rs14327472. It is therefore not weakly linked to both neighbors.
+
+Estimates above 0.5 should not be interpreted as genetic distances or as more than 50% observable recombination in a conventional linkage map. They warrant investigation of coding, placement, and the cross-model approximation. The negative allele check provides no support for automatically reversing the coding, but it does not rule out all genotype problems, particularly given the practical’s warning about linkage LOD behavior in this advanced intercross.
