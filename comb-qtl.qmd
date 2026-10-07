@@ -732,3 +732,61 @@ Within chromosome 1, a relatively continuous yellow band follows the diagonal, w
 #### **Interpretation**
 
 The overall pattern supports the supplied chromosome grouping, but the interruptions on chromosome 3 warrant closer examination of marker order and genotype quality. Marker 3_23988469 also has the highest missingness (45.28%), whereas Gg_rs15777012 has only 0.87% missingness. Thus, high missingness alone cannot explain all the unusual patterns. The chromosome-specific plots and alternative-order comparisons are needed before deciding whether to revise the marker order.
+
+### Examine each chromosome separately
+
+```{r}
+#| label: fig-comb-recombination-chr1
+#| fig-cap: "Estimated pairwise recombination fractions among the nine chromosome 1 markers."
+#| fig-width: 9
+#| fig-height: 9
+
+par(
+  pty = "s",
+  mar = c(5, 5, 4, 2) + 0.1,
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+
+plotRF(
+  comb_cross_rf,
+  chr = 1,
+  what = "rf",
+  col.scheme = "viridis",
+  main = "Pairwise recombination: chromosome 1"
+)
+```
+
+```{r}
+#| label: fig-comb-recombination-chr3
+#| fig-cap: "Estimated pairwise recombination fractions among the 31 chromosome 3 markers."
+#| fig-width: 9
+#| fig-height: 9
+
+par(
+  pty = "s",
+  mar = c(5, 5, 4, 2) + 0.1,
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+
+plotRF(
+  comb_cross_rf,
+  chr = 3,
+  what = "rf",
+  col.scheme = "viridis",
+  main = "Pairwise recombination: chromosome 3"
+)
+```
+
+#### **Observations** 
+
+**Chromosome 1.** Recombination fractions generally increase as markers become farther apart in the supplied order: colors change from yellow or green near the diagonal toward purple farther away. Markers 5 (Gg_rs13939684) and 6 (Gg_rs15427022) form a particularly bright off-diagonal pair, indicating a small estimated recombination fraction. No similarly conspicuous dark row or column interrupts the neighboring-marker pattern.
+
+**Chromosome 3.** Two markers clearly interrupt the diagonal pattern: 3 (Gg_rs15777012) and 8 (3_23988469). Marker 3 has dark-purple cells with neighboring markers 2 (Gg_rs15015376) and 4 (chr3_16000000). Marker 8 likewise shows darker cells with neighboring markers 7 (Gg_rs15282380) and 9 (Gg_rs14327472) than the surrounding diagonal blocks. These patterns indicate relatively large estimated recombination fractions despite proximity in the supplied order. Several other regions contain bright blocks, particularly around marker indices 13–16, indicating small recombination fractions among those markers.
+
+#### **Interpretation**
+
+Chromosome 1 appears broadly consistent with the supplied order, whereas chromosome 3 contains specific inconsistencies requiring further investigation. The patterns at Gg_rs15777012 and 3_23988469 could reflect incorrect placement or genotype-coding problems; the heatmap alone cannot distinguish these explanations. Although 3_23988469 has substantial missingness (45.28%), Gg_rs15777012 has little missingness (0.87%). Alternative-order comparisons and genotype checks are therefore needed before changing the map. Bright blocks also suggest that the data may provide limited information for resolving the order of some closely linked markers.
