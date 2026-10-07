@@ -2180,3 +2180,15 @@ print(
   digits = 4
 )
 ```
+
+#### **Observations**
+
+The chromosome 3 peak exceeds its corresponding permutation threshold in all four models. The unadjusted peak occurs at 12.00 cM with LOD 5.673, while all adjusted peaks occur at 12.76 cM, with LOD scores of 18.777 for sex, 12.997 for body weight, and 21.448 for both covariates. Their permutation-adjusted p-values are displayed as 0.000.
+
+On chromosome 1, the unadjusted peak (LOD 1.427, adjusted p = 0.640) and sex-adjusted peak (LOD 2.442, adjusted p = 0.120) do not meet the 5% criterion. The body-weight-adjusted peak at 130.00 cM does meet it (LOD 4.409, adjusted p = 0.002). With both covariates, the peak occurs at 125.00 cM and narrowly exceeds its threshold (LOD 2.982 versus 2.858; adjusted p = 0.042).
+
+#### Interpretation
+
+Chromosome 3 provides consistent evidence of a comb-mass QTL across the four covariate specifications. Chromosome 1 provides weaker, model-dependent evidence, particularly after both covariates are included. Its fully adjusted result should therefore be interpreted cautiously rather than given the same weight as the chromosome 3 result. These significance assessments apply separately within each model across chromosomes 1 and 3 and remain approximate because the permutations do not account for family relationships.
+
+Chromosome 3 p-values displayed as 0.000 indicate very small empirical permutation p-values. With only 1,000 permutations, such small tail probabilities cannot be estimated precisely.
