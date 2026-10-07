@@ -1865,3 +1865,163 @@ All four scans use the same individuals with complete comb-mass, sex, and body-w
 #### Observations
 
 The common analysis sample contains 440 individuals with complete comb-mass, sex, and body-weight data: 215 in sex group 1 and 225 in sex group 2. The remaining 132 individuals were excluded because at least one required value was missing. Using this same sample for all four scans prevents differences in sample composition from affecting the covariate comparison.
+
+### Perform the four Haley–Knott scans
+
+```{r}
+#| label: run-covariate-comparison-scans
+
+out.hk_unadjusted <- scanone(
+  comb_cross_scan,
+  pheno.col = "comb_g",
+  method = "hk",
+  model = "normal"
+)
+
+out.hk_sex <- scanone(
+  comb_cross_scan,
+  pheno.col = "comb_g",
+  method = "hk",
+  model = "normal",
+  addcovar = scan_covariates[
+    , "sex_group_2", drop = FALSE
+  ]
+)
+
+out.hk_weight <- scanone(
+  comb_cross_scan,
+  pheno.col = "comb_g",
+  method = "hk",
+  model = "normal",
+  addcovar = scan_covariates[
+    , "body_weight", drop = FALSE
+  ]
+)
+
+out.hk_sex_weight <- scanone(
+  comb_cross_scan,
+  pheno.col = "comb_g",
+  method = "hk",
+  model = "normal",
+  addcovar = scan_covariates
+)
+
+scan_results <- list(
+  "Unadjusted" = out.hk_unadjusted,
+  "Sex" = out.hk_sex,
+  "Body weight" = out.hk_weight,
+  "Sex + body weight" = out.hk_sex_weight
+)
+```
+
+### Summarize chromosome-specific peaks
+
+The following table reports the highest peak on each chromosome for each scan. These are descriptive peaks.
+
+```{r}
+#| label: summarize-covariate-scan-peaks
+
+scan_peak_summary <- do.call(
+  rbind,
+  lapply(
+    names(scan_results),
+    function(scan_name) {
+      
+      peaks <- summary(scan_results[[scan_name]])
+      
+      data.frame(
+        scan = scan_name,
+        chromosome = as.character(peaks$chr),
+        position_cm = round(peaks$pos, 2),
+        lod = round(peaks[, 3], 3)
+      )
+    }
+  )
+)
+
+rownames(scan_peak_summary) <- NULL
+
+cat("Highest peak on each chromosome for each scan:\n\n")
+
+print(scan_peak_summary, row.names = FALSE)
+```
+
+### Compare the LOD curves
+
+```{r}
+#| label: fig-covariate-scan-comparison
+
+#| fig-cap: "Haley–Knott scans for comb mass using the same individuals, with no covariates, sex, body weight, or both covariates."
+#| fig-width: 11
+#| fig-height: 7
+#| out-width: "100%"
+
+scan_colors <- c(
+  "Unadjusted" = "#333333",
+  "Sex" = "#0072B2",
+  "Body weight" = "#D55E00",
+  "Sex + body weight" = "#009E73"
+)
+
+scan_line_types <- c(1, 2, 3, 4)
+
+maximum_lod <- max(
+  vapply(
+    scan_results,
+    function(result) max(result[, 3], na.rm = TRUE),
+    numeric(1)
+  )
+)
+
+par(
+  mar = c(5, 5, 4, 2) + 0.1,
+  cex.main = 1.3,
+  cex.lab = 1.2,
+  cex.axis = 1.1
+)
+
+plot(
+  scan_results[[1]],
+  chr = c("1", "3"),
+  col = scan_colors[1],
+  lty = scan_line_types[1],
+  lwd = 2,
+  ylim = c(0, maximum_lod * 1.4),
+  main = "Comb-mass QTL scans: covariate comparison",
+  xlab = "Chromosome",
+  ylab = "LOD score"
+)
+
+for (i in 2:length(scan_results)) {
+  plot(
+    scan_results[[i]],
+    chr = c("1", "3"),
+    col = scan_colors[i],
+    lty = scan_line_types[i],
+    lwd = 2,
+    add = TRUE
+  )
+}
+
+legend(
+  "topright",
+  legend = names(scan_results),
+  col = unname(scan_colors),
+  lty = scan_line_types,
+  lwd = 2,
+  bty = "n",
+  cex = 1
+)
+```
+
+#### **Observations**
+
+The strongest peak consistently occurs near the beginning of chromosome 3. Its estimated position changes only slightly, from 12.00 cM in the unadjusted scan to 12.76 cM in all three adjusted scans. Its LOD increases from 5.673 without covariates to 18.777 with sex, 12.997 with body weight, and 21.448 with both covariates. Sex adjustment produces a larger increase than body-weight adjustment alone, while including both produces the strongest evidence.
+
+Chromosome 1 shows a weaker and less consistent pattern. The unadjusted and sex-adjusted peaks both occur at 90.77 cM, with LOD scores of 1.427 and 2.442. With body weight included, the highest peak shifts to 130.00 cM and reaches 4.409. Including both covariates gives a peak at 125.00 cM, with a lower LOD of 2.982 than body-weight adjustment alone. Covariate adjustment therefore changes both the strength and location of the chromosome 1 maximum.
+
+#### **Interpretation** 
+
+The increased chromosome 3 LOD is consistent with adjustment removing substantial background variation associated with sex and body weight, making the genotype-associated component of comb-mass variation easier to detect. The relatively stable peak position supports a consistent localization across these models. However, LOD differences alone do not establish the biological mechanism or quantify the variance explained by either covariate.
+
+The chromosome 1 results show that adjustment does not uniformly strengthen QTL evidence. Its changing maximum warrants more cautious localization. All results remain conditional on the provisional map and F2 approximation. Statistical significance must be assessed using permutation thresholds for the corresponding models over the scanned chromosomes 1 and 3.
