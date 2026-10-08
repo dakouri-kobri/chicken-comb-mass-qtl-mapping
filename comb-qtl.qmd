@@ -2505,3 +2505,61 @@ The chromosome 1 conditional profile has a broad region of elevated LOD scores, 
 The chromosome 3 profile shows a much stronger, concentrated peak near the beginning of the chromosome. The position table places its maximum at 12.763 cM, with a conditional LOD of approximately 20 in the plot. The profile declines sharply beyond this region; the remaining local maxima are substantially lower.
 
 These profiles support a clearer location for the chromosome 3 QTL than for the chromosome 1 candidate. However, peak shape alone does not establish a confidence interval. The two plots also use different vertical scales, so their peak heights should be compared using the LOD-axis values.
+
+### Refit and compare the models
+
+**Refit the same formula at the refined positions**
+
+```{r}
+#| label: fit-refined-comb-qtl-model
+
+comb_qtl_fit_refined <- fitqtl(
+  comb_cross_model,
+  pheno.col = "comb_g",
+  qtl = comb_qtl_refined,
+  covar = scan_covariates,
+  formula = comb_qtl_formula,
+  method = "hk",
+  model = "normal",
+  dropone = TRUE,
+  get.ests = TRUE
+)
+
+summary(comb_qtl_fit_refined)
+```
+
+**Compare comb model fits**
+
+```{r}
+#| label: compare-comb-model-fits
+
+model_fit_comparison <- data.frame(
+  model = c("Initial positions", "Refined positions"),
+  full_model_LOD = c(
+    comb_qtl_fit_initial$lod,
+    comb_qtl_fit_refined$lod
+  ),
+  variance_explained_percent = c(
+    comb_qtl_fit_initial$result.full["Model", "%var"],
+    comb_qtl_fit_refined$result.full["Model", "%var"]
+  )
+)
+
+print(model_fit_comparison, row.names = FALSE, digits = 6)
+
+cat(
+  "\nChange in full-model LOD:",
+  comb_qtl_fit_refined$lod - comb_qtl_fit_initial$lod,
+  "\n"
+)
+```
+
+#### Observations and interpretation
+
+Refinement increased the full-model LOD from 170.785 to 171.340 (an increase of 0.555) and the variance explained from 83.2620% to 83.3589%, a gain of approximately 0.097 percentage points. These values include both QTL, sex, and body weight.
+
+At its refined position of 93 cM, the chromosome 1 candidate had a conditional LOD of 1.586 and a nominal F-test p-value of 0.0275, compared with 0.0967 at its initial position. However, this test does not account for selecting the position through refinement using the same data. The result therefore provides tentative additional support rather than independent confirmation of the chromosome 1 QTL.
+
+The chromosome 3 QTL remained at 12.763 cM and retained strong conditional support (LOD 20.186; F-test p \< 2 × 10⁻¹⁶). Its additive-effect estimate was 4.141 g (SE 0.420 g), corresponding to an adjusted BB–AA difference of approximately 8.282 g, calculated as twice the additive estimate.
+
+Overall, refinement produced a small improvement in model fit. The chromosome 3 result remained stable, whereas the chromosome 1 position and statistical support were more dependent on the model and position-selection procedure.
