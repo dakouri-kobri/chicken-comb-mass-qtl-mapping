@@ -2595,3 +2595,25 @@ Only chromosomes **1 and 3** were provided. The permutation thresholds control t
 The analyses used **440 individuals** with complete comb-mass, sex, and body-weight records. Family structure was not modeled, despite the related individuals in this population; this limits the calibration of standard tests and unrestricted permutations.
 
 Finally, the founder-line correspondence of AA and BB was not confirmed. The estimated effect direction can therefore be described using genotype codes, but cannot yet be assigned to White Leghorn or red junglefowl alleles. QTL association alone does not identify a causal gene or variant.
+
+## 13. Reproducibility
+
+The analysis code, outputs, observations, and interpretations are contained in this Quarto document. Project changes are tracked with Git, and R package versions are recorded in `renv.lock`.
+
+Random seeds are specified in the permutation and QTL-refinement chunks. The following outputs document the dependency status and the R session used to generate this report.
+
+### Check the project environment
+
+```{r}
+#| label: reproducibility-renv-status
+
+renv::status()
+```
+
+### Record the R session
+
+```{r}
+#| label: reproducibility-session-info
+
+sessionInfo()
+```
