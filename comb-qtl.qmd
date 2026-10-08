@@ -2305,3 +2305,37 @@ summary(comb_qtl_initial)
 ```
 
 Initial QTL positions were taken from the chromosome-specific peaks of the scan adjusted for sex and body weight: 125.0 cM on chromosome 1 and 12.8 cM on chromosome 3. Genotype probabilities at these positions were extracted for joint model fitting.
+
+### Fit the model with sex and body weight
+
+```{r}
+#| label: fit-comb-two-qtl-model
+
+comb_qtl_formula <- y ~ Q1 + Q2 + sex_group_2 + body_weight
+
+comb_qtl_fit_initial <- fitqtl(
+  comb_cross_model,
+  pheno.col = "comb_g",
+  qtl = comb_qtl_initial,
+  covar = scan_covariates,
+  formula = comb_qtl_formula,
+  method = "hk",
+  model = "normal",
+  dropone = TRUE,
+  get.ests = TRUE
+)
+
+summary(comb_qtl_fit_initial)
+```
+
+#### Observations and interpretation
+
+The two-QTL model, including sex and body weight, explained
+
+$$
+100\times\frac{\text{Model SS}}{text{Total SS}} = 100\times \frac{82946.02}{99620.51} \approx 83.261\%
+$$
+
+of the observed variation in comb mass, with a full-model LOD score of 170.785. These values describe the combined contribution of the QTL and covariates and cannot be attributed solely to the QTL.
+
+Removing the chromosome 3 QTL substantially reduced model fit (conditional LOD 19.497; F-test p \< 2 × 10⁻¹⁶). In contrast, removing the chromosome 1 QTL produced a much smaller reduction (conditional LOD 1.031; p = 0.0967). Thus, although chromosome 1 narrowly exceeded the permutation threshold in the single-QTL scan, its additional contribution was not significant at the 5% level when chromosome 3 was included. Sex and body weight also retained strong conditional associations with comb mass.
