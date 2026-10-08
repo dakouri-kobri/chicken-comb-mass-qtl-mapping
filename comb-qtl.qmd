@@ -2339,3 +2339,49 @@ $$
 of the observed variation in comb mass, with a full-model LOD score of 170.785. These values describe the combined contribution of the QTL and covariates and cannot be attributed solely to the QTL.
 
 Removing the chromosome 3 QTL substantially reduced model fit (conditional LOD 19.497; F-test p \< 2 × 10⁻¹⁶). In contrast, removing the chromosome 1 QTL produced a much smaller reduction (conditional LOD 1.031; p = 0.0967). Thus, although chromosome 1 narrowly exceeded the permutation threshold in the single-QTL scan, its additional contribution was not significant at the 5% level when chromosome 3 was included. Sex and body weight also retained strong conditional associations with comb mass.
+
+### Examine conditional QTL contributions and effects
+
+**Conditional comb QTL contributions**
+
+```{r}
+#| label: conditional-comb-qtl-contributions
+
+cat("Drop-one-term comparisons:\n")
+print(comb_qtl_fit_initial$result.drop)
+```
+
+**Estimated comb QTL effects**
+
+```{r}
+#| label: estimated-comb-qtl-effects
+
+cat("Estimated model coefficients:\n")
+print(comb_qtl_fit_initial$ests)
+```
+
+```{r}
+#| label: showing-standard-error
+
+effect_estimates <- comb_qtl_fit_initial$ests
+
+comb_effect_table <- data.frame(
+  term = names(effect_estimates$ests),
+  estimate = as.numeric(effect_estimates$ests),
+  SE = sqrt(diag(effect_estimates$covar)),
+  row.names = NULL
+)
+
+cat("Estimated model coefficients and standard errors:\n")
+print(comb_effect_table, row.names = FALSE, digits = 4)
+```
+
+#### Observations and interpretation
+
+The chromosome 3 QTL had an estimated additive effect of 4.094 g (SE 0.425 g). Doubling this estimate gives an adjusted BB–AA difference of approximately 8.188 g, with BB predicted to have higher comb mass than AA. Its dominance deviation was −0.699 g (SE 0.603 g), providing limited evidence that heterozygotes differ from the midpoint of the two homozygote groups.
+
+The chromosome 1 additive effect was −1.080 g (SE 0.498 g), corresponding to an adjusted BB–AA difference of approximately −2.159 g. Its dominance deviation was −0.309 g (SE 0.738 g). Nevertheless, the joint test of its additive and dominance components was not significant at the 5% level (conditional LOD 1.031; F-test p = 0.0967), so this candidate remains tentative.
+
+Holding the QTL terms and body weight constant, sex group 2 had an estimated comb mass 21.793 g lower than group 1. Body weight had a positive coefficient of 0.01124, conditional on sex and both QTL terms.
+
+These estimates depend on the provisional genetic map and F2 approximation. AA and BB cannot yet be assigned to the founder lines because their correspondence has not been confirmed.
