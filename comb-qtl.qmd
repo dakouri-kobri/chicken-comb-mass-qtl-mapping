@@ -2441,3 +2441,67 @@ print(
   digits = 6
 )
 ```
+
+### Examine the conditional LOD profiles
+
+The plotted profiles show each QTL's contribution while accounting for other QTLs and both covariates.
+
+```{r}
+#| label: fig-refined-chr1-profile
+#| fig-cap: "Conditional LOD profile for the chromosome 1 candidate, accounting for the chromosome 3 QTL, sex, and body weight."
+#| fig-width: 9
+#| fig-height: 6
+
+plotLodProfile(
+  comb_qtl_refined,
+  chr = "1",
+  col = "#0072B2",
+  lwd = 2,
+  qtl.labels = FALSE,
+  main = "Conditional QTL profile: chromosome 1",
+  xlab = "Genetic position (cM)",
+  ylab = "Conditional LOD score"
+)
+
+abline(
+  v = comb_qtl_refined$pos[
+    as.character(comb_qtl_refined$chr) == "1"
+  ],
+  col = "#666666",
+  lty = 2
+)
+```
+
+```{r}
+#| label: fig-refined-chr3-profile
+#| fig-cap: "Conditional LOD profile for the chromosome 3 QTL, accounting for the chromosome 1 candidate, sex, and body weight."
+#| fig-width: 9
+#| fig-height: 6
+
+plotLodProfile(
+  comb_qtl_refined,
+  chr = "3",
+  col = "#009E73",
+  lwd = 2,
+  qtl.labels = FALSE,
+  main = "Conditional QTL profile: chromosome 3",
+  xlab = "Genetic position (cM)",
+  ylab = "Conditional LOD score"
+)
+
+abline(
+  v = comb_qtl_refined$pos[
+    as.character(comb_qtl_refined$chr) == "3"
+  ],
+  col = "#666666",
+  lty = 2
+)
+```
+
+#### **Observations and interpretation**:
+
+The chromosome 1 conditional profile has a broad region of elevated LOD scores, with its highest peak at the refined position of 93 cM and a conditional LOD of approximately 1.6. A second local maximum appears around 110–115 cM. The low peak and broad profile provide limited support for precisely locating this tentative QTL.
+
+The chromosome 3 profile shows a much stronger, concentrated peak near the beginning of the chromosome. The position table places its maximum at 12.763 cM, with a conditional LOD of approximately 20 in the plot. The profile declines sharply beyond this region; the remaining local maxima are substantially lower.
+
+These profiles support a clearer location for the chromosome 3 QTL than for the chromosome 1 candidate. However, peak shape alone does not establish a confidence interval. The two plots also use different vertical scales, so their peak heights should be compared using the LOD-axis values.
