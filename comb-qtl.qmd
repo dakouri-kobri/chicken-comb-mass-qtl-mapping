@@ -1,7 +1,7 @@
 ---
 title: "QTL Mapping of Chicken Comb Mass"
 subtitle: "An F8 advanced intercross practical"
-author: "Your name"
+author: "Dakouri Kobri"
 date: today
 format: html
 editor: visual
@@ -2563,3 +2563,35 @@ At its refined position of 93 cM, the chromosome 1 candidate had a conditional L
 The chromosome 3 QTL remained at 12.763 cM and retained strong conditional support (LOD 20.186; F-test p \< 2 × 10⁻¹⁶). Its additive-effect estimate was 4.141 g (SE 0.420 g), corresponding to an adjusted BB–AA difference of approximately 8.282 g, calculated as twice the additive estimate.
 
 Overall, refinement produced a small improvement in model fit. The chromosome 3 result remained stable, whereas the chromosome 1 position and statistical support were more dependent on the model and position-selection procedure.
+
+## 12. Conclusions and limitations
+
+### Main QTL findings
+
+The strongest evidence for a comb-mass QTL was found near the beginning of chromosome 3. After adjustment for sex and body weight, the single-QTL scan reached **LOD 21.448 at 12.763 cM**, exceeding the permutation-based 5% threshold of **2.858** for the scanned chromosomes.
+
+The chromosome 3 position remained unchanged during joint model refinement. In the refined two-QTL model, its conditional LOD was **20.186**, and its additive-effect estimate was **4.141 g** (SE **0.420 g**). Doubling the additive estimate gives an adjusted BB–AA difference of approximately **8.282 g**, with higher predicted comb mass for BB. The dominance deviation was relatively small compared with its standard error.
+
+Evidence for a chromosome 1 QTL was weaker. Its fully adjusted single-QTL peak narrowly exceeded the permutation threshold (**LOD 2.982; permutation p = 0.042**). Joint refinement moved its estimated position from **125 to 93 cM**. Although the refined conditional F-test gave **p = 0.0275**, this nominal test does not account for selecting the position using the same data. Chromosome 1 therefore remains a tentative candidate.
+
+### Influence of sex and body weight
+
+Accounting for sex and body weight substantially changed the QTL results. The chromosome 3 peak LOD increased from **5.673** without covariates to **18.777** with sex, **12.997** with body weight, and **21.448** with both. Its peak position remained near **12–13 cM**.
+
+This pattern is consistent with the covariates accounting for phenotypic variation that otherwise obscured the chromosome 3 association. The chromosome 1 peak position and strength were more sensitive to covariate choice.
+
+Sex and body weight retained strong conditional associations with comb mass in the joint model. Adjustment for body weight estimates QTL associations with comb mass at a given body weight; it does not establish whether a QTL acts directly on comb growth or through overall body size.
+
+The refined model explained **83.359%** of the observed variation. This percentage includes both QTL and both covariates and must not be interpreted as variation explained by the QTL alone.
+
+### Limitations
+
+The F8 advanced intercross was analyzed using an **F2 approximation**. The genotype probabilities, genetic map, effect estimates, and statistical tests are therefore conditional on this working model.
+
+The genetic map remains provisional. Marker **Gg_rs15777012** was excluded following unresolved linkage and placement diagnostics, while substantial gaps remained on chromosome 3. The five genotype calls flagged by error-LOD analysis were retained because errors were not independently confirmed.
+
+Only chromosomes **1 and 3** were provided. The permutation thresholds control the scan-wide error rate over these chromosomes, rather than the complete chicken genome. They also do not adjust jointly for examining four covariate models.
+
+The analyses used **440 individuals** with complete comb-mass, sex, and body-weight records. Family structure was not modeled, despite the related individuals in this population; this limits the calibration of standard tests and unrestricted permutations.
+
+Finally, the founder-line correspondence of AA and BB was not confirmed. The estimated effect direction can therefore be described using genotype codes, but cannot yet be assigned to White Leghorn or red junglefowl alleles. QTL association alone does not identify a causal gene or variant.
