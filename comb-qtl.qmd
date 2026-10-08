@@ -2385,3 +2385,37 @@ The chromosome 1 additive effect was −1.080 g (SE 0.498 g), corresponding to a
 Holding the QTL terms and body weight constant, sex group 2 had an estimated comb mass 21.793 g lower than group 1. Body weight had a positive coefficient of 0.01124, conditional on sex and both QTL terms.
 
 These estimates depend on the provisional genetic map and F2 approximation. AA and BB cannot yet be assigned to the founder lines because their correspondence has not been confirmed.
+
+## 11. Refine QTL positions and compare model fits
+
+### Refine the QTL positions
+
+The initial QTL positions were refined within the two-QTL model, retaining sex and body weight as covariates. The chromosome 1 QTL is retained as a tentative candidate for this comparison.
+
+```{r}
+#| label: refine-comb-qtl-positions
+
+set.seed(20261008)
+
+comb_qtl_refined <- refineqtl(
+  comb_cross_model,
+  pheno.col = "comb_g",
+  qtl = comb_qtl_initial,
+  covar = scan_covariates,
+  formula = comb_qtl_formula,
+  method = "hk",
+  model = "normal",
+  maxit = 10,
+  incl.markers = TRUE,
+  keeplodprofile = TRUE,
+  verbose = TRUE
+)
+
+summary(comb_qtl_refined)
+```
+
+#### Observations and interpretation
+
+Refinement moved the chromosome 1 candidate from 125.000 to 93.000 cM, a decrease of 32.000 cM in its map coordinate. The chromosome 3 QTL remained at 12.763 cM. The overall model LOD increased by 0.555, with no further improvement during the second iteration.
+
+The chromosome 3 position was therefore stable under joint model refinement. The substantial movement of the chromosome 1 candidate, despite a modest improvement in fit, indicates that its estimated position depends on the model context. Refinement alone does not establish its significance or positional precision.
