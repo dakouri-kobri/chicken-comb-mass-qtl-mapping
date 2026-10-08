@@ -2419,3 +2419,25 @@ summary(comb_qtl_refined)
 Refinement moved the chromosome 1 candidate from 125.000 to 93.000 cM, a decrease of 32.000 cM in its map coordinate. The chromosome 3 QTL remained at 12.763 cM. The overall model LOD increased by 0.555, with no further improvement during the second iteration.
 
 The chromosome 3 position was therefore stable under joint model refinement. The substantial movement of the chromosome 1 candidate, despite a modest improvement in fit, indicates that its estimated position depends on the model context. Refinement alone does not establish its significance or positional precision.
+
+### Compare initial and refined positions
+
+Calculate the movement of each QTL. Positive changes indicate movement toward a higher map coordinate.
+
+```{r}
+#| label: compare-comb-qtl-positions
+
+qtl_position_comparison <- data.frame(
+  QTL = c("Q1", "Q2"),
+  chromosome = as.character(comb_qtl_initial$chr),
+  initial_position_cM = comb_qtl_initial$pos,
+  refined_position_cM = comb_qtl_refined$pos,
+  change_cM = comb_qtl_refined$pos - comb_qtl_initial$pos
+)
+
+print(
+  qtl_position_comparison,
+  row.names = FALSE,
+  digits = 6
+)
+```
